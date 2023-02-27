@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -uo pipefail
+IFS=$'\n\t'
+
+trace() {
+  local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
+  echo "[zfs-qemu-prepare-root] ${STAMP} $@" >&2
+}
+
+fail() {
+  trace "FATAL $@"
+  exit 1
+}
+trap fail ERR
+
+RUNDIR=$(dirname $0)
+
+cd $RUNDIR
+
+trace "building root image"
+
+mmdebstrap \
+  --variant=minbase \
+  --include=busybox \
+    --customize-hook='chroot "$1" busybox --install -s' \
+  bullseye libexec/root.ext2
+
+trace "done"

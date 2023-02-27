@@ -28,7 +28,7 @@ qemu-system-x86_64 \
   -device virtio-serial-device \
   -device virtconsole,chardev=virtiocon0 \
   -device pvpanic \
-  -drive id=root,file=$RUNDIR/libexec/bullseye.ext2,format=raw,read-only=on,if=none \
+  -drive id=root,file=$RUNDIR/libexec/root.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-device,drive=root \
 
 trace "done"
