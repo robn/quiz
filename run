@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -uo pipefail
+IFS=$'\n\t'
+
+trace() {
+  local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
+  echo "[zfs-qemu-run] ${STAMP} $@" >&2
+}
+
+fail() {
+  trace "FATAL $@"
+  exit 1
+}
+trap fail ERR
+
+RUNDIR=$(dirname $0)
+
+trace "running qemu"
+
+qemu-system-x86_64 \
+	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
+	-enable-kvm \
+		-cpu host -m 1G -smp 2 \
+  -kernel $RUNDIR/libexec/bzImage \
+		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=k" \
+  -nodefaults -no-user-config -nographic \
+  -chardev stdio,id=virtiocon0 \
+  -device virtio-serial-device \
+  -device virtconsole,chardev=virtiocon0 \
+  -device pvpanic \
+  -drive id=root,file=$RUNDIR/libexec/bullseye.ext2,format=raw,read-only=on,if=none \
+  -device virtio-blk-device,drive=root \
+
+trace "done"
