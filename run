@@ -22,7 +22,7 @@ qemu-system-x86_64 \
 	-enable-kvm \
 		-cpu host -m 1G -smp 2 \
   -kernel $RUNDIR/libexec/bzImage \
-		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=k" \
+		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,id=virtiocon0 \
   -device virtio-serial-device \
