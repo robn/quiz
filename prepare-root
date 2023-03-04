@@ -21,8 +21,9 @@ trace "building root image"
 
 mmdebstrap \
   --variant=minbase \
-  --include=coreutils,procps,tini \
+  --include=tini,coreutils,procps,kmod \
     --customize-hook='install -m 755 init "$1"/sbin/init' \
+    --customize-hook='mkdir "$1"/lib/modules' \
   bullseye libexec/root.ext2
 
 trace "done"
