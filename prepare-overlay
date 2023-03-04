@@ -22,6 +22,7 @@ fi
 
 trace "install kernel module structure"
 
+rm -rf libexec/overlay
 mkdir -p libexec/overlay
 make -C kernel/linux-5.10.170 install modules_install \
   INSTALL_PATH=$PWD/libexec/overlay INSTALL_MOD_PATH=$PWD/libexec/overlay
