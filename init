@@ -11,4 +11,7 @@ mkdir /tmp/overlay
 mount -t 9p -o trans=virtio overlay /tmp/overlay \
   -oversion=9p2000.L,posiixacl,msize=104857600,cache=loose
 
+mount --bind /tmp/overlay/lib/modules /lib/modules
+mount --bind /tmp/overlay/opt /opt
+
 exec tini -vwsg /bin/bash
