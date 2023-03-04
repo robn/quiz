@@ -1,0 +1,10 @@
+#!/bin/sh
+
+mount -t sysfs none /sys
+mount -t proc none /proc
+mount -t devtmpfs none /dev
+mount -t tmpfs none /tmp
+
+hostname zfs-qemu
+
+exec tini -vwsg /bin/bash

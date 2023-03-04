@@ -21,8 +21,8 @@ trace "building root image"
 
 mmdebstrap \
   --variant=minbase \
-  --include=busybox \
-    --customize-hook='chroot "$1" busybox --install -s' \
+  --include=coreutils,procps,tini \
+    --customize-hook='install -m 755 init "$1"/sbin/init' \
   bullseye libexec/root.ext2
 
 trace "done"
