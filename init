@@ -7,4 +7,8 @@ mount -t tmpfs none /tmp
 
 hostname zfs-qemu
 
+mkdir /tmp/overlay
+mount -t 9p -o trans=virtio overlay /tmp/overlay \
+  -oversion=9p2000.L,posiixacl,msize=104857600,cache=loose
+
 exec tini -vwsg /bin/bash

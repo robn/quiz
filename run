@@ -30,5 +30,7 @@ qemu-system-x86_64 \
   -device pvpanic \
   -drive id=root,file=$RUNDIR/libexec/root.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-device,drive=root \
+  -fsdev local,id=overlay,path=$RUNDIR/libexec/overlay,security_model=none,readonly=on \
+  -device virtio-9p-device,fsdev=overlay,mount_tag=overlay \
 
 trace "done"
