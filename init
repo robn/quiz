@@ -14,4 +14,7 @@ mount -t 9p -o trans=virtio overlay /tmp/overlay \
 mount --bind /tmp/overlay/lib/modules /lib/modules
 mount --bind /tmp/overlay/opt /opt
 
+insmod /lib/modules/$(uname -r)/extra/spl.ko
+insmod /lib/modules/$(uname -r)/extra/zfs.ko
+
 exec tini -vwsg /bin/bash
