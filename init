@@ -17,6 +17,19 @@ mount --bind /tmp/overlay/opt /opt
 insmod /lib/modules/$(uname -r)/extra/spl.ko
 insmod /lib/modules/$(uname -r)/extra/zfs.ko
 
+if grep -qs "zq\.formatdevs=1" /proc/cmdline ; then
+  sgdisk -ZN0 /dev/vdb
+  sgdisk -ZN0 /dev/vdc
+fi
+
 export PATH=/opt/openzfs/sbin:$PATH
+
+if grep -qs "zq\.createpool=1" /proc/cmdline ; then
+  zpool create -f -O atime=off tank mirror /dev/vdb1 /dev/vdc1
+elif grep -qs "zq\.importpool=1" /proc/cmdline ; then
+  zpool import -d /dev/vdb1 tank
+fi
+
+zpool status
 
 exec tini -vwsg /bin/bash

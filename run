@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 set -uo pipefail
-IFS=$'\n\t'
+
+usage() {
+  cat <<EOF
+spin up a qemu microvm with ZFS ready to go
+usage: $0 [opts]
+
+options:
+  -b    create a pair of block devices and make them available to the vm
+  -p    with -b, preserve existing block devices if they exist
+  -z    with -b, create a pool. with -p, import it
+  -h    this help
+EOF
+  exit 1
+}
 
 trace() {
   local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
@@ -13,7 +26,72 @@ fail() {
 }
 trap fail ERR
 
+opt_block=0
+opt_preserve_block=0
+opt_setup_pool=0
+
+OPTIND=1
+while getopts "bpzh" opt
+do
+  case "$opt" in
+    'b') opt_block=1 ;;
+    'p') opt_preserve_block=1 ;;
+    'z') opt_setup_pool=1 ;;
+    'h') usage ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
 RUNDIR=$(dirname $0)
+
+EXTRA_QEMU_OPTS=""
+EXTRA_KERNEL_OPTS=""
+
+# option dep checks
+if [ $opt_block = 0 ] ; then
+  if [ $opt_preserve_block = 1 ] ; then
+    fail "can't use -p without -b"
+  elif [ $opt_setup_pool = 1 ] ; then
+    fail "can't use -z without -b"
+  fi
+fi
+
+# setup block devices
+if [ $opt_block = 1 ] ; then
+  trace "preparing block devices"
+
+  if [ ! -e $RUNDIR/block1 -a $opt_preserve_block = 0 ] ; then
+    trace "creating block1 backing file"
+    dd if=/dev/zero of=$RUNDIR/block1 bs=1M count=512 conv=sparse
+  fi
+
+  if [ ! -e $RUNDIR/block2 -a ! $opt_preserve_block = 0 ] ; then
+    trace "creating block2 backing file"
+    dd if=/dev/zero of=$RUNDIR/block2 bs=1M count=512 conv=sparse
+  fi
+
+  EXTRA_QEMU_OPTS="$EXTRA_QEMU_OPTS \
+    -drive id=block1,file=block1,format=raw,if=none \
+    -device virtio-blk-device,drive=block1 \
+    -drive id=block2,file=block2,format=raw,if=none \
+    -device virtio-blk-device,drive=block2 \
+  "
+
+  if [ $opt_preserve_block = 0 ] ; then
+    trace "will format block devices on boot"
+    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS zq.formatdevs=1"
+  fi
+fi
+
+if [ $opt_setup_pool = 1 ] ; then
+  if [ $opt_preserve_block = 1 ] ; then
+    trace "will import pool on boot"
+    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS zq.importpool=1"
+  else
+    trace "will create pool on boot"
+    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS zq.createpool=1"
+  fi
+fi
 
 trace "running qemu"
 
@@ -22,7 +100,7 @@ qemu-system-x86_64 \
 	-enable-kvm \
 		-cpu host -m 1G -smp 2 \
   -kernel $RUNDIR/libexec/bzImage \
-		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t" \
+		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $EXTRA_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,id=virtiocon0 \
   -device virtio-serial-device \
@@ -32,5 +110,6 @@ qemu-system-x86_64 \
   -device virtio-blk-device,drive=root \
   -fsdev local,id=overlay,path=$RUNDIR/libexec/overlay,security_model=none,readonly=on \
   -device virtio-9p-device,fsdev=overlay,mount_tag=overlay \
+  $EXTRA_QEMU_OPTS \
 
 trace "done"
