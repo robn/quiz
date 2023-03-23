@@ -17,4 +17,6 @@ mount --bind /tmp/overlay/opt /opt
 insmod /lib/modules/$(uname -r)/extra/spl.ko
 insmod /lib/modules/$(uname -r)/extra/zfs.ko
 
+export PATH=/opt/openzfs/sbin:$PATH
+
 exec tini -vwsg /bin/bash
