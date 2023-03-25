@@ -38,6 +38,7 @@ do
     'p') opt_preserve_block=1 ;;
     'z') opt_setup_pool=1 ;;
     'h') usage ;;
+    *) exit 1 ;;
   esac
 done
 shift $(expr $OPTIND - 1)
