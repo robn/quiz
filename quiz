@@ -67,7 +67,7 @@ if [ $opt_block = 1 ] ; then
     dd if=/dev/zero of=$RUNDIR/system/block/block1 bs=1M count=512 conv=sparse
   fi
 
-  if [ ! -e $RUNDIR/block2 -a ! $opt_preserve_block = 0 ] ; then
+  if [ ! -e $RUNDIR/system/block/block2 -a $opt_preserve_block = 0 ] ; then
     trace "creating block2 backing file"
     dd if=/dev/zero of=$RUNDIR/system/block/block2 bs=1M count=512 conv=sparse
   fi
