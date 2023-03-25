@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -uo pipefail
-IFS=$'\n\t'
 
 trace() {
-  local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
-  echo "[quiz-prepare-kernel] ${STAMP} $@" >&2
+  local STAMP=$(date +%Y%m%d-%H:%M:%S)
+  echo "[quiz-prepare-kernel] $STAMP $@" >&2
 }
 
 fail() {

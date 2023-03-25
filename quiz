@@ -16,8 +16,8 @@ EOF
 }
 
 trace() {
-  local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
-  echo "[quiz-run] ${STAMP} $@" >&2
+  local STAMP=$(date +%Y%m%d-%H:%M:%S)
+  echo "[quiz] $STAMP $@" >&2
 }
 
 fail() {
