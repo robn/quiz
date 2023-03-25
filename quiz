@@ -4,7 +4,7 @@ set -uo pipefail
 usage() {
   cat <<EOF
 spin up a qemu microvm with ZFS ready to go
-usage: $0 [opts]
+usage: quiz [opts] [program [args...]]
 
 options:
   -b    create a pair of block devices and make them available to the vm
