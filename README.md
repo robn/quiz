@@ -81,3 +81,4 @@ Linux quiz 5.10.170 #1 SMP Sat Mar 25 22:04:29 AEDT 2023 x86_64 GNU/Linux
   * and then delete them
 * something with mdadm, building fake error environments
 * zfs build support (`quiz-build-zfs` or something)
+* a config file, be way less hardcodey
