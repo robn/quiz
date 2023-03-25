@@ -17,7 +17,7 @@ EOF
 
 trace() {
   local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
-  echo "[zfs-qemu-run] ${STAMP} $@" >&2
+  echo "[quiz-run] ${STAMP} $@" >&2
 }
 
 fail() {
@@ -79,17 +79,17 @@ if [ $opt_block = 1 ] ; then
 
   if [ $opt_preserve_block = 0 ] ; then
     trace "will format block devices on boot"
-    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS zq.formatdevs=1"
+    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS quiz.formatdevs=1"
   fi
 fi
 
 if [ $opt_setup_pool = 1 ] ; then
   if [ $opt_preserve_block = 1 ] ; then
     trace "will import pool on boot"
-    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS zq.importpool=1"
+    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS quiz.importpool=1"
   else
     trace "will create pool on boot"
-    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS zq.createpool=1"
+    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS quiz.createpool=1"
   fi
 fi
 

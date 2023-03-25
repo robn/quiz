@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 trace() {
   local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
-  echo "[zfs-qemu-prepare-root] ${STAMP} $@" >&2
+  echo "[quiz-prepare-root] ${STAMP} $@" >&2
 }
 
 fail() {

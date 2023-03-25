@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 trace() {
   local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
-  echo "[zfs-qemu-prepare-overlay] ${STAMP} $@" >&2
+  echo "[quiz-prepare-overlay] ${STAMP} $@" >&2
 }
 
 fail() {
@@ -17,7 +17,7 @@ RUNDIR=$(dirname $0)
 
 cd $RUNDIR
 if [[ ! -d kernel ]] ; then
-  fail "didn't find kernel dir, you might need to run prepare-kernel first"
+  fail "didn't find kernel dir, you might need to run quiz-prepare-kernel first"
 fi
 
 trace "install kernel module structure"
