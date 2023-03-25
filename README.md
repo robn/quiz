@@ -80,5 +80,4 @@ Linux quiz 5.10.170 #1 SMP Sat Mar 25 22:04:29 AEDT 2023 x86_64 GNU/Linux
   * and then move the block/persist/pool switches to it
   * and then delete them
 * something with mdadm, building fake error environments
-* prepare-work upgrade by default
 * zfs build support (`quiz-build-zfs` or something)

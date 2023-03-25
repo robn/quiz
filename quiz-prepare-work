@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+usage() {
+  cat <<EOF
+create or update the work dir for the quiz microvm
+usage: quiz-prepare-work [opts]
+
+options:
+  -N    always create a new dir (without this, update existing)
+EOF
+  exit 1
+}
+
 trace() {
   local STAMP=$(date +%Y%m%d-%H:%M:%S)
   echo "[quiz-prepare-work] $STAMP $@" >&2
@@ -12,6 +23,19 @@ fail() {
 }
 trap fail ERR
 
+opt_new=0
+
+OPTIND=1
+while getopts "Nh" opt
+do
+  case "$opt" in
+    'N') opt_new=1 ;;
+    'h') usage ;;
+    *) exit 1 ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
 RUNDIR=$(realpath $(dirname $0))
 
 cd $RUNDIR
@@ -19,16 +43,28 @@ if [[ ! -d build/kernel ]] ; then
   fail "didn't find kernel dir, you might need to run quiz-prepare-kernel first"
 fi
 
+if [[ ! -d system/work ]] ; then
+  opt_new=1
+fi
+
+if [[ $opt_new = 0 ]] ; then
+  trace "updating existing work dir"
+else
+  trace "creating new work dir"
+  rm -rf system/work
+  mkdir -p system/work
+fi
+
 trace "install kernel module structure"
-
-rm -rf system/work
-mkdir -p system/work
-
 make -C build/kernel/linux-5.10.170 install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
 
+trace "installing init"
 install -m 755 init/init2 system/work/init
 
-mkdir -p system/work/zfs
+if [[ ! -d system/work/zfs ]] ; then
+  trace "creating zfs install target"
+  mkdir -p system/work/zfs
+fi
 
 trace "done"
