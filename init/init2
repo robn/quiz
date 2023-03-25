@@ -6,6 +6,7 @@
 hostname quiz
 
 mount --bind /work/lib/modules /lib/modules
+mount --bind /work/zfs /zfs
 
 insmod /lib/modules/$(uname -r)/extra/spl.ko
 insmod /lib/modules/$(uname -r)/extra/zfs.ko
@@ -15,7 +16,7 @@ if grep -qs "quiz\.formatdevs=1" /proc/cmdline ; then
   sgdisk -ZN0 /dev/vdc
 fi
 
-export PATH=/work/zfs/sbin:$PATH
+export PATH=/zfs/sbin:$PATH
 
 if grep -qs "quiz\.createpool=1" /proc/cmdline ; then
   zpool create -f -O atime=off tank mirror /dev/vdb1 /dev/vdc1
