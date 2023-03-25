@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# first-stage init. get the kernel filesystems and the work overlay up, then
+# bounce into into the second-stage in the work dir
+
+mount -t sysfs none /sys
+mount -t proc none /proc
+mount -t devtmpfs none /dev
+mount -t tmpfs none /tmp
+
+mount -t 9p -o trans=virtio work /work \
+  -oversion=9p2000.L,posiixacl,msize=104857600,cache=loose
+
+exec /work/init

@@ -20,10 +20,8 @@ trace "building root image"
 mmdebstrap \
   --variant=minbase \
   --include=tini,coreutils,procps,kmod,gdisk \
-    --customize-hook='install -m 755 root/init "$1"/sbin/init' \
-    --customize-hook='mkdir "$1"/lib/modules' \
-    --customize-hook='mkdir "$1"/quiz' \
-    --customize-hook='mkdir "$1"/z' \
+    --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
+    --customize-hook='mkdir "$1"/work "$1"/lib/modules "$1"/tank' \
   bullseye $RUNDIR/system/root.ext2
 
 trace "done"

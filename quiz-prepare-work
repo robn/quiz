@@ -24,9 +24,12 @@ trace "install kernel module structure"
 
 rm -rf system/work
 mkdir -p system/work
+
 make -C build/kernel/linux-5.10.170 install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
 
-mkdir -p system/work/z
+install -m 755 init/init2 system/work/init
+
+mkdir -p system/work/zfs
 
 trace "done"
