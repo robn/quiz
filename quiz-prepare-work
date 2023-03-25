@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 trace() {
   local STAMP=$( date '+%Y%m%d-%H:%M:%S' )
-  echo "[quiz-prepare-overlay] ${STAMP} $@" >&2
+  echo "[quiz-prepare-work] ${STAMP} $@" >&2
 }
 
 fail() {
@@ -13,20 +13,20 @@ fail() {
 }
 trap fail ERR
 
-RUNDIR=$(dirname $0)
+RUNDIR=$(realpath $(dirname $0))
 
 cd $RUNDIR
-if [[ ! -d kernel ]] ; then
+if [[ ! -d build/kernel ]] ; then
   fail "didn't find kernel dir, you might need to run quiz-prepare-kernel first"
 fi
 
 trace "install kernel module structure"
 
-rm -rf libexec/overlay
-mkdir -p libexec/overlay
-make -C kernel/linux-5.10.170 install modules_install \
-  INSTALL_PATH=$PWD/libexec/overlay INSTALL_MOD_PATH=$PWD/libexec/overlay
+rm -rf system/work
+mkdir -p system/work
+make -C build/kernel/linux-5.10.170 install modules_install \
+  INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
 
-mkdir -p libexec/overlay/opt
+mkdir -p system/work/z
 
 trace "done"

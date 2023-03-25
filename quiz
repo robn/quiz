@@ -60,20 +60,22 @@ fi
 if [ $opt_block = 1 ] ; then
   trace "preparing block devices"
 
-  if [ ! -e $RUNDIR/block1 -a $opt_preserve_block = 0 ] ; then
+  mkdir -p $RUNDIR/system/block
+
+  if [ ! -e $RUNDIR/system/block/block1 -a $opt_preserve_block = 0 ] ; then
     trace "creating block1 backing file"
-    dd if=/dev/zero of=$RUNDIR/block1 bs=1M count=512 conv=sparse
+    dd if=/dev/zero of=$RUNDIR/system/block/block1 bs=1M count=512 conv=sparse
   fi
 
   if [ ! -e $RUNDIR/block2 -a ! $opt_preserve_block = 0 ] ; then
     trace "creating block2 backing file"
-    dd if=/dev/zero of=$RUNDIR/block2 bs=1M count=512 conv=sparse
+    dd if=/dev/zero of=$RUNDIR/system/block/block2 bs=1M count=512 conv=sparse
   fi
 
   EXTRA_QEMU_OPTS="$EXTRA_QEMU_OPTS \
-    -drive id=block1,file=block1,format=raw,if=none \
+    -drive id=block1,file=$RUNDIR/system/block/block1,format=raw,if=none \
     -device virtio-blk-device,drive=block1 \
-    -drive id=block2,file=block2,format=raw,if=none \
+    -drive id=block2,file=$RUNDIR/system/block/block2,format=raw,if=none \
     -device virtio-blk-device,drive=block2 \
   "
 
@@ -99,17 +101,17 @@ qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \
 		-cpu host -m 1G -smp 2 \
-  -kernel $RUNDIR/libexec/bzImage \
+  -kernel $RUNDIR/system/bzImage \
 		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $EXTRA_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,id=virtiocon0 \
   -device virtio-serial-device \
   -device virtconsole,chardev=virtiocon0 \
   -device pvpanic \
-  -drive id=root,file=$RUNDIR/libexec/root.ext2,format=raw,read-only=on,if=none \
+  -drive id=root,file=$RUNDIR/system/root.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-device,drive=root \
-  -fsdev local,id=overlay,path=$RUNDIR/libexec/overlay,security_model=none,readonly=on \
-  -device virtio-9p-device,fsdev=overlay,mount_tag=overlay \
+  -fsdev local,id=work,path=$RUNDIR/system/work,security_model=none,readonly=on \
+  -device virtio-9p-device,fsdev=work,mount_tag=work \
   $EXTRA_QEMU_OPTS \
 
 trace "done"

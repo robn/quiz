@@ -13,18 +13,17 @@ fail() {
 }
 trap fail ERR
 
-RUNDIR=$(dirname $0)
-
-cd $RUNDIR
+RUNDIR=$(realpath $(dirname $0))
 
 trace "building root image"
 
 mmdebstrap \
   --variant=minbase \
   --include=tini,coreutils,procps,kmod,gdisk \
-    --customize-hook='install -m 755 init "$1"/sbin/init' \
+    --customize-hook='install -m 755 root/init "$1"/sbin/init' \
     --customize-hook='mkdir "$1"/lib/modules' \
-    --customize-hook='mkdir "$1"/tank' \
-  bullseye libexec/root.ext2
+    --customize-hook='mkdir "$1"/quiz' \
+    --customize-hook='mkdir "$1"/z' \
+  bullseye $RUNDIR/system/root.ext2
 
 trace "done"

@@ -13,30 +13,31 @@ fail() {
 }
 trap fail ERR
 
-RUNDIR=$(dirname $0)
+RUNDIR=$(realpath $(dirname $0))
 
 cd $RUNDIR
 
-if [[ ! -d kernel ]] ; then
+mkdir -p build
+if [[ ! -d build/kernel ]] ; then
   trace "preparing kernel source"
-  mkdir -p kernel
-  cd kernel
+  mkdir -p build/kernel
+  pushd build/kernel
   curl -O https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.170.tar.xz
   tar xfJ linux-5.10.170.tar.xz
-  cd ..
-  cp config-5.10 kernel/linux-5.10.170/.config
+  popd
+  cp kernel/config-5.10 build/kernel/linux-5.10.170/.config
 fi
 
 trace "building kernel"
 
-cd kernel/linux-5.10.170
+pushd build/kernel/linux-5.10.170
 make olddefconfig
 make -j8
-cd ../..
+popd
 
 trace "moving completed kernel into place"
 
-mkdir -p libexec
-cp kernel/linux-5.10.170/arch/x86/boot/bzImage libexec
+mkdir -p system
+cp build/kernel/linux-5.10.170/arch/x86/boot/bzImage system/bzImage
 
 trace "done"
