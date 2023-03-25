@@ -42,7 +42,7 @@ do
 done
 shift $(expr $OPTIND - 1)
 
-RUNDIR=$(dirname $0)
+RUNDIR=$(realpath $(dirname $0))
 
 EXTRA_QEMU_OPTS=""
 EXTRA_KERNEL_OPTS=""
