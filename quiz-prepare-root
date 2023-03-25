@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+usage() {
+  cat <<EOF
+create a minimal root filesystem for the quiz microvm
+usage: quiz-prepare-root
+EOF
+  exit 1
+}
+
 trace() {
   local STAMP=$(date +%Y%m%d-%H:%M:%S)
   echo "[quiz-prepare-root] $STAMP $@" >&2
@@ -11,6 +19,16 @@ fail() {
   exit 1
 }
 trap fail ERR
+
+OPTIND=1
+while getopts "h" opt
+do
+  case "$opt" in
+    'h') usage ;;
+    *) exit 1 ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
 
 RUNDIR=$(realpath $(dirname $0))
 
