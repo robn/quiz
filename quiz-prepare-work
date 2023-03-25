@@ -60,7 +60,8 @@ make -C build/kernel/linux-5.10.170 install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
 
 trace "installing init"
-install -m 755 init/init2 system/work/init
+mkdir -p system/work/.quiz
+install -m 755 init/init2 system/work/.quiz/init2
 
 if [[ ! -d system/work/zfs ]] ; then
   trace "creating zfs install target"

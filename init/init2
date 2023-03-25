@@ -26,4 +26,4 @@ fi
 
 zpool status
 
-exec tini -vwsg /work/.quiz.run
+exec tini -vwsg /work/.quiz/run

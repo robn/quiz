@@ -11,4 +11,4 @@ mount -t tmpfs none /tmp
 mount -t 9p -o trans=virtio work /work \
   -oversion=9p2000.L,posiixacl,msize=104857600,cache=loose
 
-exec /work/init
+exec /work/.quiz/init2

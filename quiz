@@ -98,17 +98,17 @@ fi
 
 
 if [ $# -ne 0 ] ; then
-  echo -n exec > $RUNDIR/system/work/.quiz.run
+  echo -n exec > $RUNDIR/system/work/.quiz/run
   for arg in "$@" ; do
-    echo -n " '$arg'" >> $RUNDIR/system/work/.quiz.run
+    echo -n " '$arg'" >> $RUNDIR/system/work/.quiz/run
   done
-  echo >> $RUNDIR/system/work/.quiz.run
+  echo >> $RUNDIR/system/work/.quiz/run
 else
-  cat > $RUNDIR/system/work/.quiz.run <<EOF
+  cat > $RUNDIR/system/work/.quiz/run <<EOF
 exec /bin/bash
 EOF
 fi
-chmod +x $RUNDIR/system/work/.quiz.run
+chmod +x $RUNDIR/system/work/.quiz/run
 
 trace "running qemu"
 
