@@ -12,9 +12,9 @@ mount --bind /work/lib/modules /lib/modules
 
 # start udev. we need device node support
 /lib/systemd/systemd-udevd &
-udevadm settle
 udevadm trigger -t subsystems
 udevadm trigger -t devices
+udevadm settle
 
 # if any profiles need work, boot them up
 if [ -r /work/.quiz/init.profile ] ; then
