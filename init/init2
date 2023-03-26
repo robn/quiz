@@ -15,4 +15,9 @@ if [ -r /work/.quiz/init.profile ] ; then
 fi
 
 # start a "real" init, and run our program
-exec tini -vwsg /work/.quiz/run
+if [ -r /work/.quiz/run ] ; then
+  exec tini -vwsg /work/.quiz/run
+fi
+
+# no program, just go to a shell
+exec tini -vwsg /bin/bash
