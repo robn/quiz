@@ -57,8 +57,9 @@ Simple boot to a shell:
 $ ./quiz
 [quiz] 20230326-12:10:54 running qemu
 ...
-[    0.618876] Run /sbin/init as init process
-[INFO  tini (1)] Spawned child process '/work/.quiz.run' with pid '461'
+[    0.500224] Run /sbin/init as init process
+[    0.606734] quiz: starting user program
+[INFO  tini (1)] Spawned child process '/work/.quiz.run' with pid '439'
 bash: cannot set terminal process group (-1): Inappropriate ioctl for device
 bash: no job control in this shell
 root@quiz:/# 
@@ -68,10 +69,12 @@ or run a program directly:
 
 ```
 $ ./quiz uname -a
-[quiz] 20230326-12:11:07 running qemu
+[quiz] 20230326-12:31:30 creating run script
+[quiz] 20230326-12:31:30 running qemu
 ...
-[    0.584406] Run /sbin/init as init process
-[INFO  tini (1)] Spawned child process '/work/.quiz.run' with pid '460'
+[    0.519514] Run /sbin/init as init process
+[    0.629666] quiz: starting user program
+[INFO  tini (1)] Spawned child process '/work/.quiz/run' with pid '439'
 Linux quiz 5.10.170 #1 SMP Sat Mar 25 22:04:29 AEDT 2023 x86_64 GNU/Linux
 [INFO  tini (1)] Main child exited normally (with status '0')
 ```
@@ -80,14 +83,16 @@ Include some profiles:
 
 ```
 $ ./quiz -p zfs zpool status
-[quiz] 20230326-12:11:23 including profile: zfs
-[quiz] 20230326-12:11:23 running qemu
+[quiz] 20230326-12:31:46 including profile: zfs
+[quiz] 20230326-12:31:46 creating run script
+[quiz] 20230326-12:31:46 running qemu
 ...
-[    0.508862] Run /sbin/init as init process
-[    0.853965] spl: loading out-of-tree module taints kernel.
-[    0.964212] zfs: module license 'CDDL' taints kernel.
-[    0.964263] Disabling lock debugging due to kernel taint
-[    1.998101] ZFS: Loaded module v2.1.99-1, ZFS pool version 5000, ZFS filesystem version 5
+[    0.775779] quiz: starting profile init
+[    0.806856] spl: loading out-of-tree module taints kernel.
+[    0.917986] zfs: module license 'CDDL' taints kernel.
+[    0.918034] Disabling lock debugging due to kernel taint
+[    1.972254] ZFS: Loaded module v2.1.99-1, ZFS pool version 5000, ZFS filesystem version 5
+[    1.973699] quiz: starting user program
 [INFO  tini (1)] Spawned child process '/work/.quiz/run' with pid '453'
 no pools available
 [INFO  tini (1)] Main child exited normally (with status '0')
