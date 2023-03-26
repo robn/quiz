@@ -37,7 +37,7 @@ trace "building root image"
 
 mmdebstrap \
   --variant=minbase \
-  --include=tini,coreutils,procps,kmod,gdisk \
+  --include=tini,udev,coreutils,procps,kmod,gdisk \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
     --customize-hook='mkdir "$1"/work "$1"/zfs "$1"/lib/modules "$1"/tank' \
   bullseye $RUNDIR/system/root.ext2
