@@ -7,7 +7,7 @@ mkdir -p $RUNDIR/system/blockdev
 
 for n in $(seq $QUIZ_BLOCKDEV_COUNT) ; do
   trace "blockdev: creating blockdev $n"
-  truncate -s $QUIZ_BLOCKDEV_SIZE $RUNDIR/system/blockdev/blockdev$n
+  fallocate -zl $QUIZ_BLOCKDEV_SIZE $RUNDIR/system/blockdev/blockdev$n
   QUIZ_QEMU_OPTS="$QUIZ_QEMU_OPTS \
     -drive id=blockdev$n,file=$RUNDIR/system/blockdev/blockdev$n,format=raw,if=none \
     -device virtio-blk-device,drive=blockdev$n \
