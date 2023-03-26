@@ -49,13 +49,13 @@ for p in $profiles ; do
   if [[ ! -d $RUNDIR/profile/$p ]] ; then
     fail "unknown profile: $p"
   fi
+  trace "including profile: $p"
+
+  if [[ -f $RUNDIR/profile/$p/setup ]] ; then
+    source $RUNDIR/profile/$p/setup
+  fi
+
   if [[ -f $RUNDIR/profile/$p/init ]] ; then
-    trace "including profile: $p"
-
-    if [[ -f $RUNDIR/profile/$p/setup ]] ; then
-      source $RUNDIR/profile/$p/setup
-    fi
-
     echo "echo 'quiz: starting profile init: $p' >> /dev/kmsg" \
       >> $RUNDIR/system/work/.quiz/init.profile
     cat $RUNDIR/profile/$p/init >> $RUNDIR/system/work/.quiz/init.profile
