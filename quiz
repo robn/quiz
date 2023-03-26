@@ -76,8 +76,9 @@ if [[ $# -ne 0 ]] ; then
   chmod +x $RUNDIR/system/work/.quiz/run
 fi
 
-trace "running qemu"
+trace "starting microvm"
 
+# this is hand rolled from my early tests. seems right but its a lot of mess
 qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \

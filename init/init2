@@ -3,6 +3,7 @@
 # second-stage init. kernel filesystems and work overlay are up, hook it all
 # up and get a shell
 
+# at least make the prompt look nice
 hostname quiz
 
 # get modules into place. we do this at the top instead of in profile because
