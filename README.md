@@ -100,7 +100,6 @@ no pools available
 
 ## Todo
 
-* a config file, be way less hardcodey
 * more profiles
   * temp blockdevs
   * persistent blockdevs

@@ -25,7 +25,10 @@ fail() {
 }
 trap fail ERR
 
-opt_profile=''
+RUNDIR=$(realpath $(dirname $0))
+source $RUNDIR/quiz.cfg
+
+opt_profile="$QUIZ_PROFILE"
 
 OPTIND=1
 while getopts "p:h" opt
@@ -37,11 +40,6 @@ do
   esac
 done
 shift $(expr $OPTIND - 1)
-
-RUNDIR=$(realpath $(dirname $0))
-
-EXTRA_QEMU_OPTS=""
-EXTRA_KERNEL_OPTS=""
 
 # get profiles set up. source the profile setup here, and build a profile init
 # to be run right before we exec into the real program
@@ -85,7 +83,7 @@ qemu-system-x86_64 \
 	-enable-kvm \
 		-cpu host -m 1G -smp 2 \
   -kernel $RUNDIR/system/bzImage \
-		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $EXTRA_KERNEL_OPTS" \
+		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,id=virtiocon0 \
   -device virtio-serial-device \
@@ -95,6 +93,6 @@ qemu-system-x86_64 \
   -device virtio-blk-device,drive=root \
   -fsdev local,id=work,path=$RUNDIR/system/work,security_model=none,readonly=on \
   -device virtio-9p-device,fsdev=work,mount_tag=work \
-  $EXTRA_QEMU_OPTS \
+  $QUIZ_QEMU_OPTS \
 
 trace "done"

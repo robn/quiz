@@ -23,6 +23,9 @@ fail() {
 }
 trap fail ERR
 
+
+RUNDIR=$(realpath $(dirname $0))
+source $RUNDIR/quiz.cfg
 opt_new=0
 
 OPTIND=1
@@ -35,8 +38,6 @@ do
   esac
 done
 shift $(expr $OPTIND - 1)
-
-RUNDIR=$(realpath $(dirname $0))
 
 cd $RUNDIR
 if [[ ! -d build/kernel ]] ; then
