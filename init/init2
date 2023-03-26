@@ -12,7 +12,6 @@ mount --bind /work/lib/modules /lib/modules
 
 # if any profiles need work, boot them up
 if [ -r /work/.quiz/init.profile ] ; then
-  echo "quiz: starting profile init" >> /dev/kmsg
   . /work/.quiz/init.profile
 fi
 

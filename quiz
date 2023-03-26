@@ -58,7 +58,8 @@ for p in $profiles ; do
       source $RUNDIR/profile/$p/setup
     fi
 
-    echo "# quiz profile init: $p" >> $RUNDIR/system/work/.quiz/init.profile
+    echo "echo 'quiz: starting profile init: $p' >> /dev/kmsg" \
+      >> $RUNDIR/system/work/.quiz/init.profile
     cat $RUNDIR/profile/$p/init >> $RUNDIR/system/work/.quiz/init.profile
   fi
 done
