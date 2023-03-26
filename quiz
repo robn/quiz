@@ -90,7 +90,7 @@ qemu-system-x86_64 \
   -device virtconsole,chardev=virtiocon0 \
   -device pvpanic \
   -drive id=root,file=$RUNDIR/system/root.ext2,format=raw,read-only=on,if=none \
-  -device virtio-blk-device,drive=root \
+  -device virtio-blk-device,drive=root,serial=root \
   -fsdev local,id=work,path=$RUNDIR/system/work,security_model=none,readonly=on \
   -device virtio-9p-device,fsdev=work,mount_tag=work \
   $QUIZ_QEMU_OPTS \
