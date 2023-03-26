@@ -5,24 +5,14 @@
 
 hostname quiz
 
+# get modules into place. we do this at the top instead of in profile because
+# we're pretty much always gonna need this
 mount --bind /work/lib/modules /lib/modules
-mount --bind /work/zfs /zfs
 
-modprobe zfs
-
-if grep -qs "quiz\.formatdevs=1" /proc/cmdline ; then
-  sgdisk -ZN0 /dev/vdb
-  sgdisk -ZN0 /dev/vdc
+# if any profiles need work, boot them up
+if [ -r /work/.quiz/init.profile ] ; then
+  . /work/.quiz/init.profile
 fi
 
-export PATH=/zfs/sbin:$PATH
-
-if grep -qs "quiz\.createpool=1" /proc/cmdline ; then
-  zpool create -f -O atime=off tank mirror /dev/vdb1 /dev/vdc1
-elif grep -qs "quiz\.importpool=1" /proc/cmdline ; then
-  zpool import -d /dev/vdb1 tank
-fi
-
-zpool status
-
+# start a "real" init, and run our program
 exec tini -vwsg /work/.quiz/run

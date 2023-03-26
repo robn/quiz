@@ -7,9 +7,8 @@ spin up a qemu microvm with ZFS ready to go
 usage: quiz [opts] [program [args...]]
 
 options:
-  -b    create a pair of block devices and make them available to the vm
-  -p    with -b, preserve existing block devices if they exist
-  -z    with -b, create a pool. with -p, import it
+  -p <profile,...>
+        list of profiles to include in this run
   -h    this help
 EOF
   exit 1
@@ -26,17 +25,13 @@ fail() {
 }
 trap fail ERR
 
-opt_block=0
-opt_preserve_block=0
-opt_setup_pool=0
+opt_profile=''
 
 OPTIND=1
-while getopts "bpzh" opt
+while getopts "p:h" opt
 do
   case "$opt" in
-    'b') opt_block=1 ;;
-    'p') opt_preserve_block=1 ;;
-    'z') opt_setup_pool=1 ;;
+    'p') opt_profile=$OPTARG ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -48,54 +43,25 @@ RUNDIR=$(realpath $(dirname $0))
 EXTRA_QEMU_OPTS=""
 EXTRA_KERNEL_OPTS=""
 
-# option dep checks
-if [ $opt_block = 0 ] ; then
-  if [ $opt_preserve_block = 1 ] ; then
-    fail "can't use -p without -b"
-  elif [ $opt_setup_pool = 1 ] ; then
-    fail "can't use -z without -b"
+# get profiles set up. source the profile setup here, and build a profile init
+# to be run right before we exec into the real program
+profiles=$(echo $opt_profile | sed 's/,/ /g')
+rm -f $RUNDIR/system/work/.quiz/init.profile
+for p in $profiles ; do
+  if [[ ! -d $RUNDIR/profile/$p ]] ; then
+    fail "unknown profile: $p"
   fi
-fi
+  if [[ -f $RUNDIR/profile/$p/init ]] ; then
+    trace "including profile: $p"
 
-# setup block devices
-if [ $opt_block = 1 ] ; then
-  trace "preparing block devices"
+    if [[ -f $RUNDIR/profile/$p/setup ]] ; then
+      source $RUNDIR/profile/$p/setup
+    fi
 
-  mkdir -p $RUNDIR/system/block
-
-  if [ ! -e $RUNDIR/system/block/block1 -a $opt_preserve_block = 0 ] ; then
-    trace "creating block1 backing file"
-    dd if=/dev/zero of=$RUNDIR/system/block/block1 bs=1M count=512 conv=sparse
+    echo "# quiz profile init: $p" >> $RUNDIR/system/work/.quiz/init.profile
+    cat $RUNDIR/profile/$p/init >> $RUNDIR/system/work/.quiz/init.profile
   fi
-
-  if [ ! -e $RUNDIR/system/block/block2 -a $opt_preserve_block = 0 ] ; then
-    trace "creating block2 backing file"
-    dd if=/dev/zero of=$RUNDIR/system/block/block2 bs=1M count=512 conv=sparse
-  fi
-
-  EXTRA_QEMU_OPTS="$EXTRA_QEMU_OPTS \
-    -drive id=block1,file=$RUNDIR/system/block/block1,format=raw,if=none \
-    -device virtio-blk-device,drive=block1 \
-    -drive id=block2,file=$RUNDIR/system/block/block2,format=raw,if=none \
-    -device virtio-blk-device,drive=block2 \
-  "
-
-  if [ $opt_preserve_block = 0 ] ; then
-    trace "will format block devices on boot"
-    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS quiz.formatdevs=1"
-  fi
-fi
-
-if [ $opt_setup_pool = 1 ] ; then
-  if [ $opt_preserve_block = 1 ] ; then
-    trace "will import pool on boot"
-    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS quiz.importpool=1"
-  else
-    trace "will create pool on boot"
-    EXTRA_KERNEL_OPTS="$EXTRA_KERNEL_OPTS quiz.createpool=1"
-  fi
-fi
-
+done
 
 if [ $# -ne 0 ] ; then
   echo -n exec > $RUNDIR/system/work/.quiz/run

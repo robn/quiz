@@ -55,6 +55,7 @@ Simple boot to a shell:
 
 ```
 $ ./quiz
+[quiz] 20230326-12:10:54 running qemu
 ...
 [    0.618876] Run /sbin/init as init process
 [INFO  tini (1)] Spawned child process '/work/.quiz.run' with pid '461'
@@ -67,6 +68,7 @@ or run a program directly:
 
 ```
 $ ./quiz uname -a
+[quiz] 20230326-12:11:07 running qemu
 ...
 [    0.584406] Run /sbin/init as init process
 [INFO  tini (1)] Spawned child process '/work/.quiz.run' with pid '460'
@@ -74,11 +76,31 @@ Linux quiz 5.10.170 #1 SMP Sat Mar 25 22:04:29 AEDT 2023 x86_64 GNU/Linux
 [INFO  tini (1)] Main child exited normally (with status '0')
 ```
 
+Include some profiles:
+
+```
+$ ./quiz -p zfs zpool status
+[quiz] 20230326-12:11:23 including profile: zfs
+[quiz] 20230326-12:11:23 running qemu
+...
+[    0.508862] Run /sbin/init as init process
+[    0.853965] spl: loading out-of-tree module taints kernel.
+[    0.964212] zfs: module license 'CDDL' taints kernel.
+[    0.964263] Disabling lock debugging due to kernel taint
+[    1.998101] ZFS: Loaded module v2.1.99-1, ZFS pool version 5000, ZFS filesystem version 5
+[INFO  tini (1)] Spawned child process '/work/.quiz/run' with pid '453'
+no pools available
+[INFO  tini (1)] Main child exited normally (with status '0')
+```
+
 ## Todo
 
-* profile scripts for setting up the environment
-  * and then move the block/persist/pool switches to it
-  * and then delete them
-* something with mdadm, building fake error environments
-* zfs build support (`quiz-build-zfs` or something)
 * a config file, be way less hardcodey
+* more profiles
+  * temp blockdevs
+  * persistent blockdevs
+  * mdadm stuff (fake error environments)
+  * pool create/import
+  * oh maybe even init could be one
+  * oh crap package setup could be one too hmmm
+* zfs build support (`quiz-build-zfs` or something)
