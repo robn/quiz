@@ -25,7 +25,7 @@ echo "quiz: starting user program" >> /dev/kmsg
 
 # start a "real" init, and run our program
 if [ -r /work/.quiz/run ] ; then
-  exec tini -vwsg /work/.quiz/run
+  exec tini -vwsg /bin/sh /work/.quiz/run
 fi
 
 # no program, just go to a shell

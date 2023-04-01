@@ -66,12 +66,7 @@ done
 rm -f $RUNDIR/system/work/.quiz/run
 if [[ $# -ne 0 ]] ; then
   trace "creating run script"
-
-  echo -n exec > $RUNDIR/system/work/.quiz/run
-  for arg in "$@" ; do
-    echo -n " '$arg'" >> $RUNDIR/system/work/.quiz/run
-  done
-  echo >> $RUNDIR/system/work/.quiz/run
+  echo "$@" > $RUNDIR/system/work/.quiz/run
   chmod +x $RUNDIR/system/work/.quiz/run
 fi
 
