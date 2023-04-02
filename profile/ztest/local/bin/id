@@ -1,0 +1,37 @@
+#!/bin/bash
+
+opt_uid=0
+opt_name=0
+
+OPTIND=1
+while getopts "un" opt
+do
+  case "$opt" in
+    'u') opt_uid=1 ;;
+    'n') opt_name=1 ;;
+    *) exit 1 ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
+if [[ $opt_uid = 1 ]] ; then
+
+  if [[ $opt_name = 1 ]] ; then
+    if [[ $QUIZ_SUDO = 1 ]] ; then
+      echo "root"
+    else
+      echo "quiz"
+    fi
+    exit 0
+  fi
+
+  if [[ $QUIZ_SUDO = 1 ]] ; then
+    echo 0
+  else
+    echo 1000
+  fi
+
+  exit 0
+fi
+
+exit 1
