@@ -1,0 +1,4 @@
+# sourced by quiz
+
+# modules may have changed since last run
+/sbin/depmod -A -b $RUNDIR/system/work 5.10.170
