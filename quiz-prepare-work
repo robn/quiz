@@ -65,9 +65,4 @@ trace "installing init"
 mkdir -p system/work/.quiz
 install -m 755 init/init2 system/work/.quiz/init2
 
-if [[ ! -d system/work/zfs ]] ; then
-  trace "creating zfs install target"
-  mkdir -p system/work/zfs
-fi
-
 trace "done"

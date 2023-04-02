@@ -1,10 +1,4 @@
 # sourced by init2
 
-# get /zfs into place
-mount --bind /work/zfs /zfs
-
-# and put zfs tools on our path
-export PATH=/zfs/sbin:/zfs/bin:$PATH
-
 # load modules
 modprobe zfs

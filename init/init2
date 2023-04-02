@@ -10,6 +10,11 @@ hostname quiz
 # we're pretty much always gonna need this
 mount --bind /work/lib/modules /lib/modules
 
+# and /usr/local, for anything that wants to install stuff into the workdir
+if [ -d /work/usr/local ] ; then
+  mount --bind /work/usr/local /usr/local
+fi
+
 # start udev. we need device node support
 /lib/systemd/systemd-udevd &
 udevadm trigger -t subsystems
