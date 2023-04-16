@@ -5,7 +5,7 @@
 
 # mount the quiz work dir
 mount -t 9p -o trans=virtio quiz /mnt/quiz \
-  -oversion=9p2000.L,posiixacl,msize=104857600,cache=loose
+  -oversion=9p2000.L,posixacl,msize=104857600,cache=loose
 
 # build the root overlay. this is creating this layering:
 #
