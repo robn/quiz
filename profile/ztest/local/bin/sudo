@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OPTIND=1
-while getopts "SEu:" opt ; do true ; done
+while getopts "SEu:n" opt ; do true ; done
 shift $(expr $OPTIND - 1)
 
 if [[ $# = 0 ]] ; then
