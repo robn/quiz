@@ -1,16 +1,41 @@
 #!/bin/sh
 
-# first-stage init. get the kernel filesystems and the work overlay up, then
-# bounce into into the second-stage in the work dir
+# first-stage init; getting the filesystems up, then we bounce into the
+# second-stage init in the quiz work dir
 
-mount -t sysfs none /sys
-mount -t proc none /proc
-mount -t devtmpfs none /dev
-mount -t tmpfs none /tmp
-mount -t tmpfs none /run
-mount -t tmpfs none /var/tmp
-
-mount -t 9p -o trans=virtio work /work \
+# mount the quiz work dir
+mount -t 9p -o trans=virtio quiz /mnt/quiz \
   -oversion=9p2000.L,posiixacl,msize=104857600,cache=loose
 
-exec /work/.quiz/init2
+# build the root overlay. this is creating this layering:
+#
+#   tmpfs         /mnt/overlay/upper [rw]
+#   quiz work dir /mnt/quiz          [ro]
+#   root.ext2     /                  [ro]
+#
+# the overlay is then mounted at /mnt/newroot
+mount -t tmpfs tmpfs /mnt/overlay
+mkdir /mnt/overlay/upper /mnt/overlay/work
+mount --bind / /mnt/lower
+mount -t overlay overlay -o lowerdir=/mnt/quiz:/mnt/lower,upperdir=/mnt/overlay/upper,workdir=/mnt/overlay/work /mnt/newroot
+
+# make /mnt/newroot the new /. after the pivot, the original root is on /mnt
+pivot_root /mnt/newroot /mnt/newroot/mnt
+
+# mount kernel filesystems
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+
+# unmount the overlay components mounts, no longer needed (the overlay is still
+# holding references under the hood; this just removes them from the visible
+# filesystem hierarchy. we use --lazy because this seems to be very slightly
+# racy and sometimes leaves one or more still mounted; it hardly matters, we're
+# just trying to tidy up
+umount --lazy /mnt/mnt/lower
+umount --lazy /mnt/mnt/overlay
+umount --lazy /mnt/mnt/quiz
+umount --lazy /mnt
+
+# bounce into the second stage
+exec /.quiz/init2

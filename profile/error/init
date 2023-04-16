@@ -1,6 +1,6 @@
 # sourced by init2
 
-for d in /work/.quiz/dm/* ; do
+for d in /.quiz/dm/* ; do
   bd=$(basename $d)
   dmsetup create $bd < $d
 done

@@ -90,8 +90,8 @@ qemu-system-x86_64 \
   -device pvpanic \
   -drive id=root,file=$RUNDIR/system/root.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-device,drive=root,serial=root \
-  -fsdev local,id=work,path=$RUNDIR/system/work,security_model=none,readonly=on \
-  -device virtio-9p-device,fsdev=work,mount_tag=work \
+  -fsdev local,id=quiz,path=$RUNDIR/system/work,security_model=none,readonly=on \
+  -device virtio-9p-device,fsdev=quiz,mount_tag=quiz \
   $QUIZ_QEMU_OPTS \
 
 trace "done"

@@ -39,7 +39,7 @@ mmdebstrap \
   --variant=minbase \
   --include=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,ksh \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
-    --customize-hook='mkdir "$1"/work "$1"/lib/modules "$1"/tank' \
+    --customize-hook='mkdir "$1"/mnt/quiz "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
   bullseye $RUNDIR/system/root.ext2
 
 trace "done"

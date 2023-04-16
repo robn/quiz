@@ -1,19 +1,10 @@
 #!/bin/sh
 
-# second-stage init. kernel filesystems and work overlay are up, hook it all
-# up and get a shell
+# second-stage init. filesystem is up, now actually boot the system and run
+# the user program
 
 # at least make the prompt look nice
 hostname quiz
-
-# get modules into place. we do this at the top instead of in profile because
-# we're pretty much always gonna need this
-mount --bind /work/lib/modules /lib/modules
-
-# and /usr/local, for anything that wants to install stuff into the workdir
-if [ -d /work/usr/local ] ; then
-  mount --bind /work/usr/local /usr/local
-fi
 
 # start udev. we need device node support
 /lib/systemd/systemd-udevd &
@@ -22,15 +13,15 @@ udevadm trigger -t devices
 udevadm settle
 
 # if any profiles need work, boot them up
-if [ -r /work/.quiz/init.profile ] ; then
-  . /work/.quiz/init.profile
+if [ -r /.quiz/init.profile ] ; then
+  . /.quiz/init.profile
 fi
 
 echo "quiz: starting user program" >> /dev/kmsg
 
 # start a "real" init, and run our program
-if [ -r /work/.quiz/run ] ; then
-  exec tini -vwsg /bin/sh -- -x /work/.quiz/run
+if [ -r /.quiz/run ] ; then
+  exec tini -vwsg /bin/sh -- -x /.quiz/run
 fi
 
 # no program, just go to a shell
