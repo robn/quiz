@@ -107,4 +107,3 @@ no pools available
   * pool create/import
   * oh maybe even init could be one
   * oh crap package setup could be one too hmmm
-* zfs build support (`quiz-build-zfs` or something)

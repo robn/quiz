@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+usage() {
+  cat <<EOF
+build ZFS with options to work well with quiz
+usage: quiz-build-zfs <configure|make> [program args...]
+EOF
+  exit 1
+}
+
+trace() {
+  local STAMP=$(date +%Y%m%d-%H:%M:%S)
+  echo "[quiz-build-zfs] $STAMP $@" >&2
+}
+
+fail() {
+  trace "FATAL $@"
+  exit 1
+}
+trap fail ERR
+
+do_configure() {
+  exec ./configure \
+    --with-linux=/home/robn/code/quiz/build/kernel/linux-5.10.170 \
+    --with-linux-obj=/home/robn/code/quiz/system/work/lib/modules/5.10.170/build \
+    --prefix=/usr/local \
+    --disable-sysvinit \
+    --disable-systemd \
+    --disable-pam \
+    'lt_cv_sys_lib_dlsearch_path_spec=/lib /usr/lib /lib/i686-linux-gnu /usr/lib/x86_64-linux-gnu' \
+    "$@"
+}
+
+do_make() {
+  exec make "$@"
+}
+
+do_make_install() {
+  exec make install \
+    DESTDIR=/home/robn/code/quiz/system/work \
+    "$@"
+}
+
+RUNDIR=$(realpath $(dirname $0))
+source $RUNDIR/quiz.cfg
+
+if [[ $# -lt 1 ]] ; then
+  usage
+fi
+
+case "$1" in
+  configure) do_configure "${@:2}" ;;
+  make)
+    if [[ $# -ge 2 && $2 == install ]] ; then
+      do_make_install "${@:3}"
+    fi
+    do_make "${@:2}"
+    ;;
+  *) usage ;;
+esac
