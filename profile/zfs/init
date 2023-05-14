@@ -1,4 +1,8 @@
 # sourced by init2
 
+# clean out /etc/zfs from previous runs
+rm -rf /etc/zfs
+mkdir /etc/zfs
+
 # load modules
 modprobe zfs
