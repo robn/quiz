@@ -12,6 +12,9 @@ udevadm trigger -t subsystems
 udevadm trigger -t devices
 udevadm settle
 
+# help out with fancy shell tricks
+ln -s /proc/self/fd /dev/fd
+
 # if any profiles need work, boot them up
 if [ -r /.quiz/init.profile ] ; then
   . /.quiz/init.profile
