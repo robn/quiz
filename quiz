@@ -80,13 +80,14 @@ trace "starting microvm"
 qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \
-		-cpu host -m 1G -smp 2 \
+		-cpu host -m 2G -smp 2 \
   -kernel $RUNDIR/system/bzImage \
 		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,id=virtiocon0 \
   -device virtio-serial-device \
   -device virtconsole,chardev=virtiocon0 \
+  -device virtio-balloon-device \
   -device pvpanic \
   -drive id=root,file=$RUNDIR/system/root.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-device,drive=root,serial=root \
