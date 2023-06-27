@@ -1,0 +1,10 @@
+# sourced by init2
+
+QUIZ_MEMDEV_COUNT=${QUIZ_MEMDEV_COUNT:-2}
+QUIZ_MEMDEV_SIZE=${QUIZ_MEMDEV_SIZE:-100M}
+
+for n in $(seq $QUIZ_MEMDEV_COUNT) ; do
+  echo "quiz: memdev: creating memdev$n" >> /dev/kmsg
+  fallocate -l $QUIZ_MEMDEV_SIZE /tmp/memdev$n
+  losetup -f /tmp/memdev$n
+done
