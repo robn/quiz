@@ -8,3 +8,5 @@ for n in $(seq $QUIZ_MEMDEV_COUNT) ; do
   fallocate -l $QUIZ_MEMDEV_SIZE /tmp/memdev$n
   losetup -f /tmp/memdev$n
 done
+
+# vim: ft=bash

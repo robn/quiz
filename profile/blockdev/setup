@@ -14,3 +14,5 @@ for n in $(seq $QUIZ_BLOCKDEV_COUNT) ; do
     -device virtio-blk-device,drive=blockdev$n,serial=blockdev$n \
   "
 done
+
+# vim: ft=bash

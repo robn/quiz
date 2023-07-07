@@ -43,3 +43,5 @@ mmdebstrap \
   bullseye $RUNDIR/system/root.ext2
 
 trace "done"
+
+# vim: ft=bash

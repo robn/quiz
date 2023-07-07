@@ -9,3 +9,5 @@ if [[ $# = 0 ]] ; then
 fi
 
 exec env QUIZ_SUDO=1 "$@"
+
+# vim: ft=bash

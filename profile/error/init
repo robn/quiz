@@ -4,3 +4,5 @@ for d in /.quiz/dm/* ; do
   bd=$(basename $d)
   dmsetup create $bd < $d
 done
+
+# vim: ft=bash

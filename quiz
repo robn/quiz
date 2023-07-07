@@ -96,3 +96,5 @@ qemu-system-x86_64 \
   $QUIZ_QEMU_OPTS \
 
 trace "done"
+
+# vim: ft=bash
