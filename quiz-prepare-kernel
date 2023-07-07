@@ -36,28 +36,34 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
+kver=${1:-QUIZ_KERNEL_VERSION}
+kpatch="${kver##*.}"
+_kmajmin="${kver%.*}"
+kminor="${_kmajmin#*.}"
+kmajor="${_kmajmin%.*}"
+
 mkdir -p build
-if [[ ! -d build/kernel ]] ; then
-  trace "preparing kernel source"
+if [[ ! -d build/kernel/linux-$kver ]] ; then
+  trace "preparing kernel source $kver"
   mkdir -p build/kernel
   pushd build/kernel
-  curl -O https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.170.tar.xz
-  tar xfJ linux-5.10.170.tar.xz
+  curl -O https://cdn.kernel.org/pub/linux/kernel/v$kmajor.x/linux-$kver.tar.xz
+  tar xfJ linux-$kver.tar.xz
   popd
-  cp kernel/config-5.10 build/kernel/linux-5.10.170/.config
+  cp kernel/config-$kmajor.$kminor build/kernel/linux-$kver/.config
 fi
 
-trace "building kernel"
+trace "building kernel $kver"
 
-pushd build/kernel/linux-5.10.170
+pushd build/kernel/linux-$kver
 make olddefconfig
-make -j8
+make -j5
 popd
 
 trace "moving completed kernel into place"
 
 mkdir -p system
-cp build/kernel/linux-5.10.170/arch/x86/boot/bzImage system/bzImage
+cp build/kernel/linux-$kver/arch/x86/boot/bzImage system/bzImage-$kver
 
 trace "done"
 

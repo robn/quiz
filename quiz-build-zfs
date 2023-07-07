@@ -22,8 +22,8 @@ trap fail ERR
 
 do_configure() {
   exec ./configure \
-    --with-linux=/home/robn/code/quiz/build/kernel/linux-5.10.170 \
-    --with-linux-obj=/home/robn/code/quiz/system/work/lib/modules/5.10.170/build \
+    --with-linux=/home/robn/code/quiz/build/kernel/linux-$QUIZ_KERNEL_VERSION \
+    --with-linux-obj=/home/robn/code/quiz/system/work/lib/modules/$QUIZ_KERNEL_VERSION/build \
     --prefix=/usr/local \
     --disable-sysvinit \
     --disable-systemd \

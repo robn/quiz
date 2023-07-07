@@ -81,7 +81,7 @@ qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \
 		-cpu host -m 2G -smp 2 \
-  -kernel $RUNDIR/system/bzImage \
+  -kernel $RUNDIR/system/bzImage-$QUIZ_KERNEL_VERSION \
 		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,id=virtiocon0 \
