@@ -56,6 +56,24 @@ else
   mkdir -p system/work
 fi
 
+# bookworm introduced "merged /usr", so /lib is a symlink to /usr/lib. we have
+# to set up for this the same way when we create the work dir, otherwise we end
+# up asking overlay to combine a symlink and a dir for (at least) /lib, for
+# which it will just take the dir as-is, and now nothing can find libc.
+#
+# XXX this would probably better if it looked inside the root image and matched
+#     what's there, but this is just fine for what I need right now and the
+#     whole bootstrapping processing is already creaking so -- robn, 2023-07-07
+
+for d in lib lib64 sbin bin ; do
+  mkdir -p system/work/usr/$d
+  if [[ $QUIZ_USR_MERGED ]] ; then
+    ln -sf usr/$d system/work/$d
+  else
+    mkdir -p system/work/$d
+  fi
+done
+
 trace "install kernel module structure"
 make -C build/kernel/linux-$QUIZ_KERNEL_VERSION install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
