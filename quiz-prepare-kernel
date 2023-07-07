@@ -60,3 +60,5 @@ mkdir -p system
 cp build/kernel/linux-5.10.170/arch/x86/boot/bzImage system/bzImage
 
 trace "done"
+
+# vim: ft=bash

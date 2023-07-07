@@ -6,3 +6,5 @@ mkdir /etc/zfs
 
 # load modules
 modprobe zfs
+
+# vim: ft=bash

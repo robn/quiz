@@ -35,3 +35,5 @@ if [[ $opt_uid = 1 ]] ; then
 fi
 
 exit 1
+
+# vim: ft=bash

@@ -2,3 +2,5 @@
 
 # modules may have changed since last run
 /sbin/depmod -A -b $RUNDIR/system/work 5.10.170
+
+# vim: ft=bash

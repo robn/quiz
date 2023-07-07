@@ -59,3 +59,5 @@ case "$1" in
     ;;
   *) usage ;;
 esac
+
+# vim: ft=bash

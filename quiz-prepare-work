@@ -66,3 +66,5 @@ mkdir -p system/work/.quiz
 install -m 755 init/init2 system/work/.quiz/init2
 
 trace "done"
+
+# vim: ft=bash
