@@ -1,0 +1,38 @@
+# default config for 'quiz', including generated config
+# don't change this, override in quiz.cfg
+
+# kernel version to use
+#QUIZ_KERNEL_VERSION=6.1.38
+QUIZ_KERNEL_VERSION=5.10.170
+
+# root system to use
+#QUIZ_DEBIAN_RELEASE="bullseye"
+QUIZ_DEBIAN_RELEASE="bookworm"
+
+# default profile set (-p will override)
+QUIZ_PROFILE=""
+
+# extra options to be passed to the kernel or qemu
+QUIZ_KERNEL_OPTS=""
+QUIZ_QEMU_OPTS=""
+
+# profile: blockdev
+QUIZ_BLOCKDEV_COUNT=2
+QUIZ_BLOCKDEV_SIZE=100M
+
+# profile: memdev
+QUIZ_MEMDEV_COUNT=2
+QUIZ_MEMDEV_SIZE=100M
+
+# load user config
+RUNDIR=$(realpath $(dirname $0))
+if [[ -f $RUNDIR/quiz.cfg ]] ; then
+  source $RUNDIR/quiz.cfg
+fi
+
+QUIZ_USR_MERGED=0
+if [[ $QUIZ_DEBIAN_RELEASE == "bookworm" ]] ; then
+  QUIZ_USR_MERGED=1
+fi
+
+# vim: ft=bash
