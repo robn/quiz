@@ -2,8 +2,8 @@
 # don't change this, override in quiz.cfg
 
 # kernel version to use
-#QUIZ_KERNEL_VERSION=6.1.38
-QUIZ_KERNEL_VERSION=5.10.170
+QUIZ_KERNEL_VERSION=6.1.38
+#QUIZ_KERNEL_VERSION=5.10.170
 
 # root system to use
 #QUIZ_DEBIAN_RELEASE="bullseye"
