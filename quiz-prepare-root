@@ -21,7 +21,7 @@ fail() {
 trap fail ERR
 
 RUNDIR=$(realpath $(dirname $0))
-source $RUNDIR/quiz.cfg
+source $RUNDIR/quiz-config
 
 OPTIND=1
 while getopts "h" opt

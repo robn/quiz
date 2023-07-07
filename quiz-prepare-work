@@ -25,7 +25,8 @@ trap fail ERR
 
 
 RUNDIR=$(realpath $(dirname $0))
-source $RUNDIR/quiz.cfg
+source $RUNDIR/quiz-config
+
 opt_new=0
 
 OPTIND=1

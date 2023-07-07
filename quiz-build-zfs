@@ -43,7 +43,7 @@ do_make_install() {
 }
 
 RUNDIR=$(realpath $(dirname $0))
-source $RUNDIR/quiz.cfg
+source $RUNDIR/quiz-config
 
 if [[ $# -lt 1 ]] ; then
   usage
