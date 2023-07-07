@@ -3,10 +3,17 @@
 QUIZ_MEMDEV_COUNT=${QUIZ_MEMDEV_COUNT:-2}
 QUIZ_MEMDEV_SIZE=${QUIZ_MEMDEV_SIZE:-100M}
 
+QUIZ_DEV_N=${QUIZ_DEV_N:-0}
+
 for n in $(seq $QUIZ_MEMDEV_COUNT) ; do
-  echo "quiz: memdev: creating memdev$n" >> /dev/kmsg
   fallocate -l $QUIZ_MEMDEV_SIZE /tmp/memdev$n
-  losetup -f /tmp/memdev$n
+  d=$(losetup --show -f /tmp/memdev$n)
+
+  q=/dev/quiz$QUIZ_DEV_N
+  QUIZ_DEV_N=$(($QUIZ_DEV_N + 1))
+
+  ln -sf $d $q
+  echo "quiz: memdev: created memdev$n; linked $q -> $d" >> /dev/kmsg
 done
 
 # vim: ft=bash
