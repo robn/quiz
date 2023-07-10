@@ -1,11 +1,6 @@
 # default config for 'quiz', including generated config
 # don't change this, override in quiz.cfg
 
-# clear out the QUIZ_ namespace, so host stuff doesn't leak into the vm
-for v in ${!QUIZ_@} ; do
-  unset $v
-done
-
 # kernel version to use
 QUIZ_KERNEL_VERSION=6.1.38
 #QUIZ_KERNEL_VERSION=5.10.170

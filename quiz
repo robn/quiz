@@ -45,11 +45,6 @@ shift $(expr $OPTIND - 1)
 # to be run right before we exec into the real program
 profiles=$(echo $opt_profile | sed 's/,/ /g')
 rm -f $RUNDIR/system/work/.quiz/init.profile
-if [[ $profiles ]] ; then
-  for v in ${!QUIZ_@} ; do
-    echo "$v=${!v@Q}" >> $RUNDIR/system/work/.quiz/init.profile
-  done
-fi
 for p in $profiles ; do
   if [[ ! -d $RUNDIR/profile/$p ]] ; then
     fail "unknown profile: $p"
