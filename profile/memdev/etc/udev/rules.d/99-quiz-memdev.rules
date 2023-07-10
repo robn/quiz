@@ -1,0 +1,1 @@
+SUBSYSTEM=="block", KERNEL=="loop[0-9]*", ENV{DEVTYPE}=="disk", PROGRAM="/usr/bin/grep -sq quizm /sys$env{DEVPATH}/loop/backing_file", SYMLINK+="quizm%n"

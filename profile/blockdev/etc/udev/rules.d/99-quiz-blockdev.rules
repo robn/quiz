@@ -1,0 +1,2 @@
+SUBSYSTEM=="block", KERNEL=="vd*[!0-9]", ATTRS{serial}=="quizb*", ENV{ID_SERIAL}="$attr{serial}", SYMLINK+="$env{ID_SERIAL}"
+SUBSYSTEM=="block", KERNEL=="vd*[0-9]", ATTRS{serial}=="quizb*", ENV{ID_SERIAL}="$attr{serial}", SYMLINK+="$env{ID_SERIAL}p%n"
