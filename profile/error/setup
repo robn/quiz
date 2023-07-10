@@ -4,11 +4,11 @@
 
 endb=$(( ($(numfmt --from=iec $QUIZ_BLOCKDEV_SIZE)-42991616)/512 ))
 
-rm -rf $RUNDIR/system/work/.quiz/dm
-mkdir -p $RUNDIR/system/work/.quiz/dm
+rm -rf $RUNDIR/system/init/.quiz/dm
+mkdir -p $RUNDIR/system/init/.quiz/dm
 for n in $(seq $QUIZ_BLOCKDEV_COUNT) ; do
   trace "error: creating erroring dm for blockdev$n"
-  cat > $RUNDIR/system/work/.quiz/dm/blockdev$n <<EOF
+  cat > $RUNDIR/system/init/.quiz/dm/blockdev$n <<EOF
 0     81920 linear /dev/disk/by-id/virtio-blockdev$n 0
 81920 2048  error
 83968 $endb linear /dev/disk/by-id/virtio-blockdev$n 83968

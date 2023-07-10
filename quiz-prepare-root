@@ -39,7 +39,8 @@ mmdebstrap \
   --variant=minbase \
   --include=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,ksh \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
-    --customize-hook='mkdir "$1"/mnt/quiz "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
+    --customize-hook='mkdir "$1"/mnt/quiz-init "$1"/mnt/quiz-system "$1"/mnt/quiz-user' \
+    --customize-hook='mkdir "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
   $QUIZ_DEBIAN_RELEASE $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2
 
 trace "done"

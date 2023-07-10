@@ -41,10 +41,18 @@ do
 done
 shift $(expr $OPTIND - 1)
 
+# create init dir and install second stage
+rm -rf $RUNDIR/system/init
+mkdir -p $RUNDIR/system/init/.quiz
+install -m 755 init/init2 $RUNDIR/system/init/.quiz/init2
+
+# XXX ensure user dir exists
+mkdir -p $RUNDIR/system/user
+
 # get profiles set up. source the profile setup here, and build a profile init
 # to be run right before we exec into the real program
 profiles=$(echo $opt_profile | sed 's/,/ /g')
-rm -f $RUNDIR/system/work/.quiz/init.profile
+rm -f $RUNDIR/system/init/.quiz/init.profile
 for p in $profiles ; do
   if [[ ! -d $RUNDIR/profile/$p ]] ; then
     fail "unknown profile: $p"
@@ -57,8 +65,8 @@ for p in $profiles ; do
 
   if [[ -f $RUNDIR/profile/$p/init ]] ; then
     echo "echo 'quiz: starting profile init: $p' >> /dev/kmsg" \
-      >> $RUNDIR/system/work/.quiz/init.profile
-    cat $RUNDIR/profile/$p/init >> $RUNDIR/system/work/.quiz/init.profile
+      >> $RUNDIR/system/init/.quiz/init.profile
+    cat $RUNDIR/profile/$p/init >> $RUNDIR/system/init/.quiz/init.profile
   fi
 
   if [[ -d $RUNDIR/profile/$p/etc ]] ; then
@@ -70,11 +78,11 @@ for p in $profiles ; do
 done
 
 # if they wanted a specific command, set up a run script for init to execute
-rm -f $RUNDIR/system/work/.quiz/run
+rm -f $RUNDIR/system/init/.quiz/run
 if [[ $# -ne 0 ]] ; then
   trace "creating run script"
-  echo "$@" > $RUNDIR/system/work/.quiz/run
-  chmod +x $RUNDIR/system/work/.quiz/run
+  echo "$@" > $RUNDIR/system/init/.quiz/run
+  chmod +x $RUNDIR/system/init/.quiz/run
 fi
 
 trace "starting microvm"
@@ -94,8 +102,12 @@ qemu-system-x86_64 \
   -device pvpanic \
   -drive id=root,file=$RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-device,drive=root,serial=root \
-  -fsdev local,id=quiz,path=$RUNDIR/system/work,security_model=none,readonly=on \
-  -device virtio-9p-device,fsdev=quiz,mount_tag=quiz \
+  -fsdev local,id=quiz-init,path=$RUNDIR/system/init,security_model=none,readonly=on \
+  -device virtio-9p-device,fsdev=quiz-init,mount_tag=quiz-init \
+  -fsdev local,id=quiz-system,path=$RUNDIR/system/work,security_model=none,readonly=on \
+  -device virtio-9p-device,fsdev=quiz-system,mount_tag=quiz-system \
+  -fsdev local,id=quiz-user,path=$RUNDIR/system/user,security_model=none,readonly=on \
+  -device virtio-9p-device,fsdev=quiz-user,mount_tag=quiz-user \
   $QUIZ_QEMU_OPTS \
 
 trace "done"

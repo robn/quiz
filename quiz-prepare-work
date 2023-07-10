@@ -80,10 +80,6 @@ make -C build/kernel/linux-$QUIZ_KERNEL_VERSION install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
 /sbin/depmod -b $RUNDIR/system/work $QUIZ_KERNEL_VERSION
 
-trace "installing init"
-mkdir -p system/work/.quiz
-install -m 755 init/init2 system/work/.quiz/init2
-
 trace "done"
 
 # vim: ft=bash
