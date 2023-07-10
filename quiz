@@ -66,6 +66,9 @@ for p in $profiles ; do
     cat $RUNDIR/profile/$p/init >> $RUNDIR/system/work/.quiz/init.profile
   fi
 
+  if [[ -d $RUNDIR/profile/$p/etc ]] ; then
+    rsync -a $RUNDIR/profile/$p/etc/ $RUNDIR/system/work/etc/
+  fi
   if [[ -d $RUNDIR/profile/$p/local ]] ; then
     rsync -a $RUNDIR/profile/$p/local/ $RUNDIR/system/work/usr/local/
   fi
