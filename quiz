@@ -99,7 +99,8 @@ qemu-system-x86_64 \
   -kernel $RUNDIR/system/bzImage-$QUIZ_KERNEL_VERSION \
 		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
-  -chardev stdio,id=virtiocon0 \
+  -chardev stdio,mux=on,id=virtiocon0 \
+  -mon chardev=virtiocon0,mode=readline \
   -device virtio-serial-device \
   -device virtconsole,chardev=virtiocon0 \
   -device virtio-balloon-device \
