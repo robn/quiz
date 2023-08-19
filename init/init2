@@ -15,6 +15,42 @@ udevadm settle
 # help out with fancy shell tricks
 ln -s /proc/self/fd /dev/fd
 
+#
+# set the terminal size correctly.
+#
+# we're on an emulated serial port, which can't send SIGWINCH. we know though
+# that there's almost certainly a vt100 on the other end of it, so we can ask
+# it to help us out.
+#
+# here, we switch to raw input mode, and send:
+#
+#   \e7          DECSC  save cursor             (vt100)
+#   \e[999;999H  CUP    move cursor to 999,999
+#   \e[6n        DSR    report cursor position
+#   \e8          DECRC  restore cursor          (vt100)
+#
+# the terminal responds to DSR by "typing" (_not_ stdin):
+#
+#   \e[<rows>;<cols>R
+#
+# note that the terminal does not "type" an enter, thus the need for raw input
+# mode. the lack of a newline means that most line-based programs will block.
+# but, sed in unbuffered mode will read the minimum required to run the
+# program.
+#
+# so we run sed to match everything up to the R, then convert it into a stty
+# command that will set the rows and columns. finally, we reset the terminal,
+# and execute the command we built. and now the terminal is properly-sized.
+# phew.
+#
+saveterm="$(stty -g)"
+stty raw
+stty -echo -icanon min 0 time 0
+echo -n '\e7\e[999;999H\e[6n\e8'
+resize=$(sed -nu '/.*R/ s/[^0-9;]//g ; s/\([0-9]*\);\([0-9]*\)/stty rows \1 cols \2/ p')
+stty "$saveterm"
+eval "$resize"
+
 # if any profiles need work, boot them up
 if [ -r /.quiz/init.profile ] ; then
   . /.quiz/init.profile
