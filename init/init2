@@ -10,7 +10,7 @@ hostname quiz
 /lib/systemd/systemd-udevd >> /dev/kmsg 2>&1 &
 udevadm trigger -t subsystems
 udevadm trigger -t devices
-udevadm settle
+udevadm settle -t 1
 
 # help out with fancy shell tricks
 ln -s /proc/self/fd /dev/fd
