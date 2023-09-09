@@ -22,15 +22,15 @@ Just don't treat anything here as more than "highly experimental".
 
 Simple boot to prompt:
 
-[![quiz boot](https://asciinema.org/a/gQAwKSBnaDiZ6ZiO6ocaARd61.svg)](https://asciinema.org/a/gQAwKSBnaDiZ6ZiO6ocaARd61)
+[![quiz boot](demo/boot.gif)](https://asciinema.org/a/gQAwKSBnaDiZ6ZiO6ocaARd61)
 
 Creating a ZFS pool over memory-backed devices:
 
-[![quiz ZFS pool create](https://asciinema.org/a/ZtZvX6MzK5y7HYsuEE7STaEbn.svg)](https://asciinema.org/a/ZtZvX6MzK5y7HYsuEE7STaEbn)
+[![quiz ZFS pool create](demo/zfs.gif)](https://asciinema.org/a/ZtZvX6MzK5y7HYsuEE7STaEbn)
 
 Running (part of) the ZFS test suite:
 
-[![quiz ZFS test suite run](https://asciinema.org/a/kZ5TeTaqH7aU2xuJHSdDDu4at.svg)](https://asciinema.org/a/kZ5TeTaqH7aU2xuJHSdDDu4at)
+[![quiz ZFS test suite run](demo/zfs-test.gif)](https://asciinema.org/a/kZ5TeTaqH7aU2xuJHSdDDu4at)
 
 ## Setup
 
