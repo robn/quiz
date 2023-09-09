@@ -45,7 +45,7 @@ ln -s /proc/self/fd /dev/fd
 #
 saveterm="$(stty -g)"
 stty raw
-stty -echo -icanon min 0 time 0
+stty -echo -icanon min 0 time 1
 echo -n '\e7\e[999;999H\e[6n\e8'
 resize=$(sed -nu '/.*R/ s/[^0-9;]//g ; s/\([0-9]*\);\([0-9]*\)/stty rows \1 cols \2/ p')
 stty "$saveterm"
