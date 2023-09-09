@@ -7,7 +7,7 @@
 hostname quiz
 
 # start udev. we need device node support
-/lib/systemd/systemd-udevd &
+/lib/systemd/systemd-udevd >> /dev/kmsg 2>&1 &
 udevadm trigger -t subsystems
 udevadm trigger -t devices
 udevadm settle
