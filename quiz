@@ -16,6 +16,7 @@ usage: quiz [opts] [program [args...]]
 options:
   -p <profile,...>
         list of profiles to include in this run
+  -S    drop into shell after run script completes
   -h    this help
 EOF
   exit 1
@@ -36,12 +37,14 @@ RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 
 opt_profile="$QUIZ_PROFILE"
+opt_shell=""
 
 OPTIND=1
-while getopts "p:h" opt
+while getopts "p:Sh" opt
 do
   case "$opt" in
     'p') opt_profile=$OPTARG ;;
+    'S') opt_shell=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -93,6 +96,9 @@ rm -f $RUNDIR/system/init/.quiz/run
 if [[ $# -ne 0 ]] ; then
   trace "creating run script"
   echo "$@" > $RUNDIR/system/init/.quiz/run
+  if [[ $opt_shell ]] ; then
+    echo "exec /bin/bash" >> $RUNDIR/system/init/.quiz/run
+  fi
   chmod +x $RUNDIR/system/init/.quiz/run
 fi
 
