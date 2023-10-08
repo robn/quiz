@@ -104,13 +104,18 @@ fi
 
 trace "starting microvm"
 
+# -chardev socket,path=quiz-socket,server=on,wait=on,id=virtiocon0 \
+#  -chardev pty,id=virtiocon0 \
+
+# -append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
+
 # this is hand rolled from my early tests. seems right but its a lot of mess
 qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \
 		-cpu host -m 2G -smp 2 \
   -kernel $RUNDIR/system/bzImage-$QUIZ_KERNEL_VERSION \
-		-append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
+    -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,mux=on,id=virtiocon0 \
   -mon chardev=virtiocon0,mode=readline \

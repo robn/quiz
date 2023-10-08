@@ -43,7 +43,7 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
-kver=${1:-QUIZ_KERNEL_VERSION}
+kver=${1:-$QUIZ_KERNEL_VERSION}
 kpatch="${kver##*.}"
 _kmajmin="${kver%.*}"
 kminor="${_kmajmin#*.}"
