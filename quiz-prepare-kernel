@@ -44,18 +44,27 @@ shift $(expr $OPTIND - 1)
 cd $RUNDIR
 
 kver=${1:-$QUIZ_KERNEL_VERSION}
-kpatch="${kver##*.}"
-_kmajmin="${kver%.*}"
+kpatch="${kver##*[.-]}"
+_kmajmin="${kver%[.-]*}"
 kminor="${_kmajmin#*.}"
 kmajor="${_kmajmin%.*}"
 
 mkdir -p build
 if [[ ! -d build/kernel/linux-$kver ]] ; then
+  if [[ "${kpatch##[a-z]*}" ]] ; then
+    ktar=linux-$kver.tar.xz
+    kurl=https://cdn.kernel.org/pub/linux/kernel/v$kmajor.x/$ktar
+    kzopt=J
+  else
+    ktar=linux-$kver.tar.gz
+    kurl=https://git.kernel.org/torvalds/t/$ktar
+    kzopt=z
+  fi
   trace "preparing kernel source $kver"
   mkdir -p build/kernel
   pushd build/kernel
-  curl -O https://cdn.kernel.org/pub/linux/kernel/v$kmajor.x/linux-$kver.tar.xz
-  tar xfJ linux-$kver.tar.xz
+  curl -OL $kurl
+  tar xf$kzopt $ktar
   popd
   cp kernel/config-$kmajor.$kminor build/kernel/linux-$kver/.config
 fi
