@@ -14,7 +14,10 @@ create or update the work dir for the quiz microvm
 usage: quiz-prepare-work [opts]
 
 options:
+  -k <kernel>
+        kernel to use for this run
   -N    always create a new dir (without this, update existing)
+  -h    this help
 EOF
   exit 1
 }
@@ -36,11 +39,13 @@ source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
 opt_new=0
+opt_kernel=""
 
 OPTIND=1
-while getopts "Nh" opt
+while getopts "k:Nh" opt
 do
   case "$opt" in
+    'k') opt_kernel=$OPTARG ;;
     'N') opt_new=1 ;;
     'h') usage ;;
     *) exit 1 ;;
@@ -49,9 +54,9 @@ done
 shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
-if [[ ! -d build/kernel ]] ; then
-  fail "didn't find kernel dir, you might need to run quiz-prepare-kernel first"
-fi
+
+quiz_select_kernel $opt_kernel
+quiz_explode_kernel_version
 
 if [[ ! -d system/work ]] ; then
   opt_new=1
@@ -82,8 +87,6 @@ for d in lib lib64 sbin bin ; do
     mkdir -p system/work/$d
   fi
 done
-
-quiz_kernel_version $QUIZ_KERNEL_VERSION
 
 trace "install kernel module structure"
 make -C build/kernel/linux-$_quiz_ksrcver install modules_install \

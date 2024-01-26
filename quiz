@@ -16,6 +16,8 @@ usage: quiz [opts] [program [args...]]
 options:
   -p <profile,...>
         list of profiles to include in this run
+  -k <kernel>
+        kernel to use for this run
   -S    drop into shell after run script completes
   -h    this help
 EOF
@@ -35,14 +37,17 @@ trap fail ERR
 
 RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
+source $RUNDIR/quiz-lib
 
+opt_kernel=""
 opt_profile="$QUIZ_PROFILE"
 opt_shell=""
 
 OPTIND=1
-while getopts "p:Sh" opt
+while getopts "k:p:Sh" opt
 do
   case "$opt" in
+    'k') opt_kernel=$OPTARG ;;
     'p') opt_profile=$OPTARG ;;
     'S') opt_shell=1 ;;
     'h') usage ;;
@@ -50,6 +55,8 @@ do
   esac
 done
 shift $(expr $OPTIND - 1)
+
+quiz_select_kernel $opt_kernel
 
 # create init dir and install second stage
 rm -rf $RUNDIR/system/init

@@ -6,8 +6,15 @@
 
 # Copyright (c) 2023, Rob Norris <robn@despairlabs.com>
 
-function quiz_kernel_version () {
-  _quiz_kver=$1
+function quiz_select_kernel () {
+  QUIZ_KERNEL_VERSION=${1:-$QUIZ_KERNEL_VERSION}
+  if [[ ! -f "$RUNDIR/system/bzImage-$QUIZ_KERNEL_VERSION" ]] ; then
+    fail "kernel version $QUIZ_KERNEL_VERSION not found"
+  fi
+}
+
+function quiz_explode_kernel_version () {
+  _quiz_kver=${1:-$QUIZ_KERNEL_VERSION}
   _quiz_kmajor="${_quiz_kver%%.*}"
   __quiz_kminpat="${_quiz_kver#*.}"
   _quiz_kminor="${__quiz_kminpat%%.*}"

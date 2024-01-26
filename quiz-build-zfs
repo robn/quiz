@@ -10,8 +10,13 @@ set -uo pipefail
 
 usage() {
   cat <<EOF
-build ZFS with options to work well with quiz
-usage: quiz-build-zfs <configure|make> [program args...]
+build OpenZFS with options to work well with quiz
+usage: quiz-build-zfs [opts] <configure|make> [program args...]
+
+options:
+  -k <kernel>
+        kernel to use for this run
+  -h    this help
 EOF
   exit 1
 }
@@ -29,8 +34,8 @@ trap fail ERR
 
 do_configure() {
   exec ./configure \
-    --with-linux=/home/robn/code/quiz/build/kernel/linux-$_quiz_ksrcver \
-    --with-linux-obj=/home/robn/code/quiz/build/kernel/linux-$_quiz_ksrcver \
+    --with-linux=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
+    --with-linux-obj=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
     --prefix=/usr/local \
     --disable-sysvinit \
     --disable-systemd \
@@ -45,7 +50,7 @@ do_make() {
 
 do_make_install() {
   exec make install \
-    DESTDIR=/home/robn/code/quiz/system/work \
+    DESTDIR=$RUNDIR/system/work \
     "$@"
 }
 
@@ -53,11 +58,26 @@ RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
+opt_new=0
+opt_kernel=""
+
+OPTIND=1
+while getopts "k:h" opt
+do
+  case "$opt" in
+    'k') opt_kernel=$OPTARG ;;
+    'h') usage ;;
+    *) exit 1 ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
 if [[ $# -lt 1 ]] ; then
   usage
 fi
 
-quiz_kernel_version $QUIZ_KERNEL_VERSION
+quiz_select_kernel $opt_kernel
+quiz_explode_kernel_version
 
 case "$1" in
   configure) do_configure "${@:2}" ;;

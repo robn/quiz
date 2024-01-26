@@ -11,7 +11,12 @@ set -uo pipefail
 usage() {
   cat <<EOF
 compile a kernel optimised for the quiz microvm
-usage: quiz-prepare-kernel
+usage: quiz-prepare-kernel [opts]
+
+options:
+  -k <kernel>
+        kernel to use for this run
+  -h    this help
 EOF
   exit 1
 }
@@ -32,10 +37,13 @@ RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
+opt_kernel=""
+
 OPTIND=1
-while getopts "h" opt
+while getopts "k:h" opt
 do
   case "$opt" in
+    'k') opt_kernel=$OPTARG ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -44,7 +52,8 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
-quiz_kernel_version ${1:-$QUIZ_KERNEL_VERSION}
+QUIZ_KERNEL_VERSION=${opt_kernel:-$QUIZ_KERNEL_VERSION}
+quiz_explode_kernel_version
 
 mkdir -p build
 if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
