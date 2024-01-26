@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# Copyright (c) 2023, Rob Norris <robn@despairlabs.com>
+
+function quiz_kernel_version () {
+  _quiz_kver=$1
+  _quiz_kmajor="${_quiz_kver%%.*}"
+  __quiz_kminpat="${_quiz_kver#*.}"
+  _quiz_kminor="${__quiz_kminpat%%.*}"
+  __quiz_kpatrc="${__quiz_kminpat##*.}"
+  _quiz_kpatch="${__quiz_kpatrc#*-}"
+
+  if [[ "${_quiz_kpatch##[a-z]*}" ]] ; then
+    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor.$_quiz_kpatch
+    _quiz_ktar=linux-$_quiz_ksrcver.tar.xz
+    _quiz_kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$_quiz_ktar
+    _quiz_kzopt=J
+  else
+    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_kpatch
+    _quiz_ktar=linux-$_quiz_ksrcver.tar.gz
+    _quiz_kurl=https://git.kernel.org/torvalds/t/$_quiz_ktar
+    _quiz_kzopt=z
+  fi
+}

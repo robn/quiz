@@ -30,6 +30,7 @@ trap fail ERR
 
 RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
+source $RUNDIR/quiz-lib
 
 OPTIND=1
 while getopts "h" opt
@@ -43,35 +44,34 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
-kver=${1:-$QUIZ_KERNEL_VERSION}
-kpatch="${kver##*[.-]}"
-_kmajmin="${kver%[.-]*}"
-kminor="${_kmajmin#*.}"
-kmajor="${_kmajmin%.*}"
+quiz_kernel_version ${1:-$QUIZ_KERNEL_VERSION}
 
 mkdir -p build
-if [[ ! -d build/kernel/linux-$kver ]] ; then
-  if [[ "${kpatch##[a-z]*}" ]] ; then
-    ktar=linux-$kver.tar.xz
-    kurl=https://cdn.kernel.org/pub/linux/kernel/v$kmajor.x/$ktar
-    kzopt=J
-  else
-    ktar=linux-$kver.tar.gz
-    kurl=https://git.kernel.org/torvalds/t/$ktar
-    kzopt=z
-  fi
-  trace "preparing kernel source $kver"
+if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
+  trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
+else
+  trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
   mkdir -p build/kernel
   pushd build/kernel
-  curl -OL $kurl
-  tar xf$kzopt $ktar
+  curl -fOL $_quiz_kurl
+  tar xf$_quiz_kzopt $_quiz_ktar
   popd
-  cp kernel/config-$kmajor.$kminor build/kernel/linux-$kver/.config
 fi
 
-trace "building kernel $kver"
+kcfg=config-$_quiz_kmajor.$_quiz_kminor
+if [[ ! -f kernel/$kcfg ]] ; then
+  kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
+fi
+if [[ ! -f kernel/$kcfg ]] ; then
+  kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
+fi
 
-pushd build/kernel/linux-$kver
+trace "installing config: $kcfg"
+cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
+
+trace "building kernel: $_quiz_kver"
+
+pushd build/kernel/linux-$_quiz_ksrcver
 make olddefconfig
 make -j5
 popd
@@ -79,7 +79,7 @@ popd
 trace "moving completed kernel into place"
 
 mkdir -p system
-cp build/kernel/linux-$kver/arch/x86/boot/bzImage system/bzImage-$kver
+cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
 
 trace "done"
 

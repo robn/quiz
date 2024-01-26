@@ -33,6 +33,7 @@ trap fail ERR
 
 RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
+source $RUNDIR/quiz-lib
 
 opt_new=0
 
@@ -82,8 +83,10 @@ for d in lib lib64 sbin bin ; do
   fi
 done
 
+quiz_kernel_version $QUIZ_KERNEL_VERSION
+
 trace "install kernel module structure"
-make -C build/kernel/linux-$QUIZ_KERNEL_VERSION install modules_install \
+make -C build/kernel/linux-$_quiz_ksrcver install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
 /sbin/depmod -b $RUNDIR/system/work $QUIZ_KERNEL_VERSION
 
