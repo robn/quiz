@@ -15,6 +15,12 @@ udevadm settle -t 1
 # help out with fancy shell tricks
 ln -s /proc/self/fd /dev/fd
 
+# mount kernel debug filesystems
+mount -t tracefs none /sys/kernel/tracing
+mount -t debugfs none /sys/kernel/debug
+mount -t configfs none /sys/kernel/config
+mount -t bpf none /sys/fs/bpf
+
 #
 # set the terminal size correctly.
 #
