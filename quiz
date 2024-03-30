@@ -66,6 +66,12 @@ install -m 755 init/init2 $RUNDIR/system/init/.quiz/init2
 # XXX ensure user dir exists
 mkdir -p $RUNDIR/system/user
 
+# delete profile file insertions from previous runs
+# XXX maybe these should be part of .quiz and in the overlay
+find profile/*/etc -type f | cut -d/ -f3- | \
+  awk "{ print \"$RUNDIR/system/work/\" \$1 }" | \
+  xargs rm -f
+
 # get profiles set up. source the profile setup here, and build a profile init
 # to be run right before we exec into the real program
 profiles=$(echo $opt_profile | sed 's/,/ /g')
@@ -90,6 +96,8 @@ for p in $profiles ; do
     cat $RUNDIR/profile/$p/init >> $RUNDIR/system/init/.quiz/init.profile
   fi
 
+  # insert profile-specific files into /etc and /usr/local
+  # XXX maybe these should be part of .quiz and in the overlay
   if [[ -d $RUNDIR/profile/$p/etc ]] ; then
     rsync -a $RUNDIR/profile/$p/etc/ $RUNDIR/system/work/etc/
   fi
