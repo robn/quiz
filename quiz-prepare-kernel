@@ -62,7 +62,12 @@ else
   trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
   mkdir -p build/kernel
   pushd build/kernel
-  curl -fOL $_quiz_kurl
+  if [[ -f $_quiz_ktar ]] ; then
+    echo "using existing tarball: $_quiz_ktar"
+  else
+    echo "downloading: $_quiz_kurl"
+    curl -fOL $_quiz_kurl
+  fi
   tar xf$_quiz_kzopt $_quiz_ktar
   popd
 fi
