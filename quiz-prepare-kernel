@@ -63,9 +63,9 @@ else
   mkdir -p build/kernel
   pushd build/kernel
   if [[ -f $_quiz_ktar ]] ; then
-    echo "using existing tarball: $_quiz_ktar"
+    trace "using existing tarball: $_quiz_ktar"
   else
-    echo "downloading: $_quiz_kurl"
+    trace "downloading: $_quiz_kurl"
     curl -fOL $_quiz_kurl
   fi
   tar xf$_quiz_kzopt $_quiz_ktar
