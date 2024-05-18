@@ -15,24 +15,57 @@ function quiz_select_kernel () {
 
 function quiz_explode_kernel_version () {
   _quiz_kver=${1:-$QUIZ_KERNEL_VERSION}
-  _quiz_kmajor="${_quiz_kver%%.*}"
-  __quiz_kminpat="${_quiz_kver#*.}"
-  _quiz_kminor="${__quiz_kminpat%%.*}"
-  __quiz_kpatrc="${__quiz_kminpat##*.}"
-  _quiz_kpatch="${__quiz_kpatrc#*-}"
 
-  if [[ "${_quiz_kpatch##[a-z]*}" ]] ; then
+  _quiz_kmajor=""
+  _quiz_kminor=""
+  _quiz_kpatch=""
+  _quiz_ktype=""
+
+  shopt -s lastpipe
+  echo $_quiz_kver | perl -nE '
+    ($maj, $min, $ty, $pat) = m/
+      ^
+        ([1-9]+[0-9]*)      # major
+        \.                  # dot sep
+        (0|[1-9]+[0-9]*)    # minor
+        (?:[\.-]            # dot or dash sep
+          (rc)?             # type
+          ([0-9]+)          # patch, always 1+
+        )?                  # third part is optional
+      $
+    /gx;
+    print qq{$maj $min $pat $ty}
+  ' | read _quiz_kmajor _quiz_kminor _quiz_kpatch _quiz_ktype
+
+  if [[ -z $_quiz_kmajor || -z $_quiz_kminor ]] ; then
+    fail "'$_quiz_kver' is not a valid kernel version"
+  fi
+  if [[ -z $_quiz_kpatch ]] ; then
+    _quiz_ktype='series'
+  fi
+  if [[ -z $_quiz_ktype ]] ; then
+    _quiz_ktype='release'
+  fi
+}
+
+function quiz_setup_source () {
+  case $_quiz_ktype in
+  release)
     _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor
     if [[ "$_quiz_kpatch" != "0" ]] ; then
-        _quiz_ksrcver="$_quiz_ksrcver.$_quiz_kpatch"
+      _quiz_ksrcver="$_quiz_ksrcver.$_quiz_kpatch"
     fi
     _quiz_ktar=linux-$_quiz_ksrcver.tar.xz
     _quiz_kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$_quiz_ktar
     _quiz_kzopt=J
-  else
-    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_kpatch
+    ;;
+  rc)
+    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-rc$_quiz_kpatch
     _quiz_ktar=linux-$_quiz_ksrcver.tar.gz
     _quiz_kurl=https://git.kernel.org/torvalds/t/$_quiz_ktar
     _quiz_kzopt=z
-  fi
+    ;;
+  *)
+    fail "unknown kernel source type $_quiz_type"
+  esac
 }

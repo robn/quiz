@@ -91,10 +91,10 @@ if [[ -n $opt_llvm ]] ; then
 fi
 
 for kver in $opt_kernel ; do
-  QUIZ_KERNEL_VERSION=$kver
-  quiz_explode_kernel_version
+  quiz_explode_kernel_version $kver
+  quiz_setup_source
 
-  trace "preparing build: $_quiz_kver"
+  trace "preparing build: $_quiz_kver ($_quiz_ktype)"
 
   mkdir -p build
   if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
