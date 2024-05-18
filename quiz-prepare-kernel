@@ -102,7 +102,7 @@ for kver in $opt_kernel ; do
   else
     trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
     mkdir -p build/kernel
-    pushd build/kernel
+    pushd build/kernel > /dev/null
     if [[ -f $_quiz_ktar ]] ; then
       trace "using existing tarball: $_quiz_ktar"
     else
@@ -110,7 +110,7 @@ for kver in $opt_kernel ; do
       curl -fOL $_quiz_kurl
     fi
     tar xf$_quiz_kzopt $_quiz_ktar
-    popd
+    popd > /dev/null
   fi
 
   kcfg=config-$_quiz_kmajor.$_quiz_kminor
@@ -128,7 +128,7 @@ for kver in $opt_kernel ; do
     trace "NOT installing config as requested"
   fi
 
-  pushd build/kernel/linux-$_quiz_ksrcver
+  pushd build/kernel/linux-$_quiz_ksrcver > /dev/null
 
   if [[ -n $opt_modify_config ]] ; then
     trace "updating config from commandline switches"
@@ -146,7 +146,7 @@ for kver in $opt_kernel ; do
     trace "NOT building kernel as requested"
   fi
 
-  popd
+  popd > /dev/null
 
   if [[ -n $opt_update_config ]] ; then
     trace "updating standard config: $kcfg"
