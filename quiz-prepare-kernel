@@ -15,6 +15,7 @@ usage: quiz-prepare-kernel [opts]
 
 options:
   -k <kernel>     kernel to build
+                    (can be used multiple times)
   -e/-d/-m <key>  set kernel config key to enable/disable/module (Y/N/M)
                     (can be used multiple times)
   -u              update standard config for this kernel minor version
@@ -53,7 +54,7 @@ OPTIND=1
 while getopts "k:CBe:d:m:uLh" opt
 do
   case "$opt" in
-    'k') opt_kernel=$OPTARG ;;
+    'k') opt_kernel="$opt_kernel $OPTARG" ;;
     'C') opt_no_config=1 ;;
     'B') opt_no_build=1 ;;
     'e') opt_modify_config="$opt_modify_config -e $OPTARG" ;;
@@ -73,9 +74,6 @@ if [[ -z $opt_kernel ]] ; then
   fail "required kernel version arg -k not found"
 fi
 
-QUIZ_KERNEL_VERSION=${opt_kernel:-$QUIZ_KERNEL_VERSION}
-quiz_explode_kernel_version
-
 makeopts=""
 if [[ -n $opt_llvm ]] ; then
   IFS=:
@@ -92,72 +90,77 @@ if [[ -n $opt_llvm ]] ; then
   makeopts="$makeopts LLVM=$best_clang"
 fi
 
-mkdir -p build
-if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
-  trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
-else
-  trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
-  mkdir -p build/kernel
-  pushd build/kernel
-  if [[ -f $_quiz_ktar ]] ; then
-    trace "using existing tarball: $_quiz_ktar"
+for kver in $opt_kernel ; do
+  QUIZ_KERNEL_VERSION=$kver
+  quiz_explode_kernel_version
+
+  trace "preparing build: $_quiz_kver"
+
+  mkdir -p build
+  if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
+    trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
   else
-    trace "downloading: $_quiz_kurl"
-    curl -fOL $_quiz_kurl
+    trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
+    mkdir -p build/kernel
+    pushd build/kernel
+    if [[ -f $_quiz_ktar ]] ; then
+      trace "using existing tarball: $_quiz_ktar"
+    else
+      trace "downloading: $_quiz_kurl"
+      curl -fOL $_quiz_kurl
+    fi
+    tar xf$_quiz_kzopt $_quiz_ktar
+    popd
   fi
-  tar xf$_quiz_kzopt $_quiz_ktar
+
+  kcfg=config-$_quiz_kmajor.$_quiz_kminor
+  if [[ ! -f kernel/$kcfg ]] ; then
+    kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
+  fi
+  if [[ ! -f kernel/$kcfg ]] ; then
+    kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
+  fi
+
+  if [[ -z $opt_no_config ]] ; then
+    trace "installing config: $kcfg"
+    cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
+  else
+    trace "NOT installing config as requested"
+  fi
+
+  pushd build/kernel/linux-$_quiz_ksrcver
+
+  if [[ -n $opt_modify_config ]] ; then
+    trace "updating config from commandline switches"
+    scripts/config $opt_modify_config
+  fi
+
+  trace "compiling config: $_quiz_ksrcver"
+
+  make olddefconfig $makeopts
+
+  if [[ -z $opt_no_build ]] ; then
+    trace "building kernel: $_quiz_ksrcver"
+    make -j5 $makeopts
+  else
+    trace "NOT building kernel as requested"
+  fi
+
   popd
-fi
 
-kcfg=config-$_quiz_kmajor.$_quiz_kminor
-if [[ ! -f kernel/$kcfg ]] ; then
-  kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
-fi
-if [[ ! -f kernel/$kcfg ]] ; then
-  kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
-fi
+  if [[ -n $opt_update_config ]] ; then
+    trace "updating standard config: $kcfg"
+    cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$kcfg
+  fi
 
-trace "preparing build: $_quiz_kver"
+  if [[ -z $opt_no_build ]] ; then
+    trace "moving completed kernel into quiz system dir: $_quiz_kver"
 
-if [[ -z $opt_no_config ]] ; then
-  trace "installing config: $kcfg"
-  cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
-else
-  trace "NOT installing config as requested"
-fi
+    mkdir -p system
+    echo cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
+  fi
 
-pushd build/kernel/linux-$_quiz_ksrcver
-
-if [[ -n $opt_modify_config ]] ; then
-  trace "updating config from commandline switches"
-  scripts/config $opt_modify_config
-fi
-
-trace "compiling config: $_quiz_ksrcver"
-
-make olddefconfig $makeopts
-
-if [[ -z $opt_no_build ]] ; then
-  trace "building kernel: $_quiz_ksrcver"
-  make -j5 $makeopts
-else
-  trace "NOT building kernel as requested"
-fi
-
-popd
-
-if [[ -n $opt_update_config ]] ; then
-  trace "updating standard config: $kcfg"
-  cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$kcfg
-fi
-
-if [[ -z $opt_no_build ]] ; then
-  trace "moving completed kernel into place"
-
-  mkdir -p system
-  echo cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
-fi
-
-trace "done"
+  trace "build finished: $_quiz_kver"
+done
 
 # vim: ft=bash
