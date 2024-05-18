@@ -14,9 +14,10 @@ compile a kernel optimised for the quiz microvm
 usage: quiz-prepare-kernel [opts]
 
 options:
-  -k <kernel>
-        kernel to use for this run
-  -h    this help
+  -k <kernel>     kernel to build
+  -C              don't replace kernel config with our own
+  -B              prepare build tree & config, don't build
+  -h              this help
 EOF
   exit 1
 }
@@ -38,12 +39,16 @@ source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
 opt_kernel=""
+opt_no_config=""
+opt_no_build=""
 
 OPTIND=1
-while getopts "k:h" opt
+while getopts "k:CBh" opt
 do
   case "$opt" in
     'k') opt_kernel=$OPTARG ;;
+    'C') opt_no_config=1 ;;
+    'B') opt_no_build=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -80,13 +85,22 @@ if [[ ! -f kernel/$kcfg ]] ; then
   kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
 fi
 
-trace "installing config: $kcfg"
-cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
+if [[ -z $opt_no_config ]] ; then
+  trace "installing config: $kcfg"
+  cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
+fi
 
 trace "building kernel: $_quiz_kver"
 
 pushd build/kernel/linux-$_quiz_ksrcver
 make olddefconfig
+
+if [[ -n $opt_no_build ]] ; then
+  trace "stopping before build as requested"
+  popd
+  exit 0
+fi
+
 make -j5
 popd
 
