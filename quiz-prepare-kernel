@@ -109,19 +109,19 @@ for kver in $opt_kernel ; do
     if [[ -z ${kernel_sumfile[$_quiz_kmajor]:-} ]] ; then
       sumfile=build/kernel/sha256sums.$_quiz_kmajor
       trace "fetching list of available kernels for v$_quiz_kmajor.x"
-      curl -o $sumfile -z $sumfile -R \
+      curl -# -f -o $sumfile -z $sumfile -R \
         https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/sha256sums.asc
       kernel_sumfile[$_quiz_kmajor]=$sumfile
     fi
     latest=$(cat ${kernel_sumfile[$_quiz_kmajor]} | \
       sed -Ene "/linux-.+\.tar.xz/ { s/.*linux-($kver\.[0-9]+)\.tar\.xz/\1/ p }" | tail -1)
-    trace "using $latest for $kver"
+    trace "will build $latest for $kver"
     kver=$latest
   fi
   kernel_versions="$kernel_versions $kver"
 done
 
-kernel_versions=$(echo $kernel_versions | xargs -n1 | sort | uniq)
+kernel_versions=$(echo $kernel_versions | xargs -n1 | sort -V | uniq | xargs)
 trace "will build kernel versions: $kernel_versions"
 
 for kver in $kernel_versions ; do
@@ -141,7 +141,7 @@ for kver in $kernel_versions ; do
       trace "using existing tarball: $_quiz_ktar"
     else
       trace "downloading: $_quiz_kurl"
-      curl -fOL $_quiz_kurl
+      curl -# -fOL $_quiz_kurl
     fi
     tar xf$_quiz_kzopt $_quiz_ktar
     popd > /dev/null
@@ -171,11 +171,11 @@ for kver in $kernel_versions ; do
 
   trace "compiling config: $_quiz_ksrcver"
 
-  make olddefconfig $makeopts
+  make -s -j6 olddefconfig $makeopts
 
   if [[ -z $opt_no_build ]] ; then
     trace "building kernel: $_quiz_ksrcver"
-    make -j5 $makeopts
+    make -j6 $makeopts
   else
     trace "NOT building kernel as requested"
   fi
