@@ -60,6 +60,10 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
+if [[ -z $opt_kernel ]] ; then
+  fail "required kernel version arg -k not found"
+fi
+
 QUIZ_KERNEL_VERSION=${opt_kernel:-$QUIZ_KERNEL_VERSION}
 quiz_explode_kernel_version
 
