@@ -22,6 +22,7 @@ options:
   -L              build with LLVM/Clang
   -C              don't install kernel config before build
   -B              don't build kernel
+  -K              build latest of all kernel series with available config
   -h              this help
 EOF
   exit 1
@@ -49,9 +50,10 @@ opt_no_build=""
 opt_llvm=""
 opt_update_config=""
 opt_modify_config=""
+opt_all_kernels=""
 
 OPTIND=1
-while getopts "k:CBe:d:m:uLh" opt
+while getopts "k:CBe:d:m:uLKh" opt
 do
   case "$opt" in
     'k') opt_kernel="$opt_kernel $OPTARG" ;;
@@ -62,6 +64,7 @@ do
     'm') opt_modify_config="$opt_modify_config -m $OPTARG" ;;
     'u') opt_update_config=1 ;;
     'L') opt_llvm=1 ;;
+    'K') opt_all_kernels=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -70,8 +73,15 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
-if [[ -z $opt_kernel ]] ; then
-  fail "required kernel version arg -k not found"
+if [[ -n $opt_kernel && -n $opt_all_kernels ]] ; then
+  fail "invalid kernel version options; can't use -k and -K together"
+fi
+if [[ -z $opt_kernel && -z $opt_all_kernels ]] ; then
+  fail "no kernel version supplied; one of -k or -K required"
+fi
+
+if [[ -n $opt_all_kernels ]] ; then
+    opt_kernel=$(ls kernel/config-* | cut -d- -f2 | sort -V)
 fi
 
 makeopts=""
