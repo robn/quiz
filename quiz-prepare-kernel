@@ -15,9 +15,10 @@ usage: quiz-prepare-kernel [opts]
 
 options:
   -k <kernel>     kernel to build
-  -C              don't replace kernel config with our own
-  -B              prepare build tree & config, don't build
+  -u              update standard config for this kernel minor version
   -L              build with LLVM/Clang
+  -C              don't install kernel config before build
+  -B              don't build kernel
   -h              this help
 EOF
   exit 1
@@ -43,14 +44,16 @@ opt_kernel=""
 opt_no_config=""
 opt_no_build=""
 opt_llvm=""
+opt_update_config=""
 
 OPTIND=1
-while getopts "k:CBLh" opt
+while getopts "k:CBuLh" opt
 do
   case "$opt" in
     'k') opt_kernel=$OPTARG ;;
     'C') opt_no_config=1 ;;
     'B') opt_no_build=1 ;;
+    'u') opt_update_config=1 ;;
     'L') opt_llvm=1 ;;
     'h') usage ;;
     *) exit 1 ;;
@@ -108,29 +111,40 @@ if [[ ! -f kernel/$kcfg ]] ; then
   kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
 fi
 
+trace "preparing build: $_quiz_kver"
+
 if [[ -z $opt_no_config ]] ; then
   trace "installing config: $kcfg"
   cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
+else
+  trace "NOT installing config as requested"
 fi
 
-trace "building kernel: $_quiz_kver"
+trace "compiling config: $_quiz_ksrcver"
 
 pushd build/kernel/linux-$_quiz_ksrcver
 make olddefconfig $makeopts
 
-if [[ -n $opt_no_build ]] ; then
-  trace "stopping before build as requested"
-  popd
-  exit 0
+if [[ -z $opt_no_build ]] ; then
+  trace "building kernel: $_quiz_ksrcver"
+  make -j5 $makeopts
+else
+  trace "NOT building kernel as requested"
 fi
 
-make -j5 $makeopts
 popd
 
-trace "moving completed kernel into place"
+if [[ -n $opt_update_config ]] ; then
+  trace "updating standard config: $kcfg"
+  cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$kcfg
+fi
 
-mkdir -p system
-cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
+if [[ -z $opt_no_build ]] ; then
+  trace "moving completed kernel into place"
+
+  mkdir -p system
+  echo cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
+fi
 
 trace "done"
 
