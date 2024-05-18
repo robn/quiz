@@ -17,6 +17,7 @@ options:
   -k <kernel>     kernel to build
   -C              don't replace kernel config with our own
   -B              prepare build tree & config, don't build
+  -L              build with LLVM/Clang
   -h              this help
 EOF
   exit 1
@@ -41,14 +42,16 @@ source $RUNDIR/quiz-lib
 opt_kernel=""
 opt_no_config=""
 opt_no_build=""
+opt_llvm=""
 
 OPTIND=1
-while getopts "k:CBh" opt
+while getopts "k:CBLh" opt
 do
   case "$opt" in
     'k') opt_kernel=$OPTARG ;;
     'C') opt_no_config=1 ;;
     'B') opt_no_build=1 ;;
+    'L') opt_llvm=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -59,6 +62,22 @@ cd $RUNDIR
 
 QUIZ_KERNEL_VERSION=${opt_kernel:-$QUIZ_KERNEL_VERSION}
 quiz_explode_kernel_version
+
+makeopts=""
+if [[ -n $opt_llvm ]] ; then
+  IFS=:
+  best_clang=$(find $PATH -maxdepth 1 -executable -name "clang-??" -print | \
+    sed -Ee 's/^.+-//' | sort -r | head -1)
+  unset IFS
+  if [[ -z "$best_clang" ]] ; then
+    trace "no specific clang found, setting LLVM=1"
+    best_clang=1
+  else
+    trace "found clang-$best_clang, setting LLVM=-$best_clang"
+    best_clang="-$best_clang"
+  fi
+  makeopts="$makeopts LLVM=$best_clang"
+fi
 
 mkdir -p build
 if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
@@ -93,7 +112,7 @@ fi
 trace "building kernel: $_quiz_kver"
 
 pushd build/kernel/linux-$_quiz_ksrcver
-make olddefconfig
+make olddefconfig $makeopts
 
 if [[ -n $opt_no_build ]] ; then
   trace "stopping before build as requested"
@@ -101,7 +120,7 @@ if [[ -n $opt_no_build ]] ; then
   exit 0
 fi
 
-make -j5
+make -j5 $makeopts
 popd
 
 trace "moving completed kernel into place"
