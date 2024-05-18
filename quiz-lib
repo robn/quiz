@@ -45,22 +45,23 @@ function quiz_explode_kernel_version () {
   fi
   if [[ -z $_quiz_ktype ]] ; then
     _quiz_ktype='release'
+    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor
+    if [[ "$_quiz_kpatch" != "0" ]] ; then
+      _quiz_ksrcver="$_quiz_ksrcver.$_quiz_kpatch"
+    fi
+  elif [[ $_quiz_ktype == "rc" ]] ; then
+    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-rc$_quiz_kpatch
   fi
 }
 
 function quiz_setup_source () {
   case $_quiz_ktype in
   release)
-    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor
-    if [[ "$_quiz_kpatch" != "0" ]] ; then
-      _quiz_ksrcver="$_quiz_ksrcver.$_quiz_kpatch"
-    fi
     _quiz_ktar=linux-$_quiz_ksrcver.tar.xz
     _quiz_kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$_quiz_ktar
     _quiz_kzopt=J
     ;;
   rc)
-    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-rc$_quiz_kpatch
     _quiz_ktar=linux-$_quiz_ksrcver.tar.gz
     _quiz_kurl=https://git.kernel.org/torvalds/t/$_quiz_ktar
     _quiz_kzopt=z
