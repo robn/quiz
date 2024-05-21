@@ -191,7 +191,7 @@ for kver in $kernel_versions ; do
     trace "moving completed kernel into quiz system dir: $_quiz_kver"
 
     mkdir -p system
-    echo cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
+    cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
   fi
 
   trace "build finished: $_quiz_kver"
