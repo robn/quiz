@@ -1,6 +1,4 @@
-# quiz - the [q]em[u] [i]nteractive [z]fs environment
-
-(Look, names are hard, and this one I found at least mildly amusing. Just go with it.)
+# 🧩 quiz: a tool for rapid OpenZFS development
 
 **quiz** is a program to support fast edit-compile-test cycles for Linux kernel development, with a focus on OpenZFS. At its heart its a qemu-based microvm, stripped down to the essentials to setup and boot a VM and start a test program in under a second.
 
