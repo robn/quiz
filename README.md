@@ -176,3 +176,8 @@ Note that profiles currently have no way to influence the kernel config or the r
   * qemu may not have support, so either make that happen (!) or find a different monitor package
 * FreeBSD guest support
   * wanted for OpenZFS dev on FreeBSD. [recent work on boot times in microvms](https://www.usenix.org/publications/loginonline/freebsd-firecracker) make this both plausible and attractive
+
+## More info
+
+* Blog post: [quiz: a tool for rapid OpenZFS development](https://despairlabs.com/blog/posts/2024-03-04-quiz-rapid-openzfs-development/)
+* BSDCan 2024 presentation: [quiz: tiny VMs for kernel development](https://despairlabs.com/presentations/quiz/)
