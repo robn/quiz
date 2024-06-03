@@ -55,8 +55,7 @@ shift $(expr $OPTIND - 1)
 
 cd $RUNDIR
 
-quiz_select_kernel $opt_kernel
-quiz_explode_kernel_version
+quiz_kernel_vars ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 
 if [[ ! -d system/work ]] ; then
   opt_new=1
@@ -91,7 +90,7 @@ done
 trace "install kernel module structure"
 make -C build/kernel/linux-$_quiz_ksrcver install modules_install \
   INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
-/sbin/depmod -b $RUNDIR/system/work $QUIZ_KERNEL_VERSION
+/sbin/depmod -b $RUNDIR/system/work $_quiz_kver
 
 trace "done"
 

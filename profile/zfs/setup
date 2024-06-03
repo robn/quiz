@@ -1,6 +1,6 @@
 # sourced by quiz
 
 # modules may have changed since last run
-/sbin/depmod -A -b $RUNDIR/system/work $QUIZ_KERNEL_VERSION
+/sbin/depmod -A -b $RUNDIR/system/work $_quiz_kver
 
 # vim: ft=bash

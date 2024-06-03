@@ -104,7 +104,7 @@ declare -A kernel_sumfile
 
 kernel_versions=""
 for kver in $opt_kernel ; do
-  quiz_explode_kernel_version $kver
+  quiz_kernel_vars $kver
   if [[ $_quiz_ktype = "series" ]] ; then
     if [[ -z ${kernel_sumfile[$_quiz_kmajor]:-} ]] ; then
       sumfile=build/kernel/sha256sums.$_quiz_kmajor
@@ -125,8 +125,22 @@ kernel_versions=$(echo $kernel_versions | xargs -n1 | sort -V | uniq | xargs)
 trace "will build kernel versions: $kernel_versions"
 
 for kver in $kernel_versions ; do
-  quiz_explode_kernel_version $kver
-  quiz_setup_source
+  quiz_kernel_vars $kver
+
+  case $_quiz_ktype in
+  release)
+    ktar=linux-$_quiz_ksrcver.tar.xz
+    kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$ktar
+    kzopt=J
+    ;;
+  rc)
+    ktar=linux-$_quiz_ksrcver.tar.gz
+    kurl=https://git.kernel.org/torvalds/t/$ktar
+    kzopt=z
+    ;;
+  *)
+    fail "unknown kernel source type $_quiz_type"
+  esac
 
   trace "preparing build: $_quiz_kver ($_quiz_ktype)"
 
@@ -137,13 +151,13 @@ for kver in $kernel_versions ; do
     trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
     mkdir -p build/kernel
     pushd build/kernel > /dev/null
-    if [[ -f $_quiz_ktar ]] ; then
-      trace "using existing tarball: $_quiz_ktar"
+    if [[ -f $ktar ]] ; then
+      trace "using existing tarball: $ktar"
     else
-      trace "downloading: $_quiz_kurl"
-      curl -# -fOL $_quiz_kurl
+      trace "downloading: $kurl"
+      curl -# -fOL $kurl
     fi
-    tar xf$_quiz_kzopt $_quiz_ktar
+    tar xf$kzopt $ktar
     popd > /dev/null
   fi
 

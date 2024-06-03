@@ -56,7 +56,7 @@ do
 done
 shift $(expr $OPTIND - 1)
 
-quiz_select_kernel $opt_kernel
+quiz_kernel_vars ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 
 # create init dir and install second stage
 rm -rf $RUNDIR/system/init
@@ -129,7 +129,7 @@ qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \
 		-cpu host -m 2G -smp 2 \
-  -kernel $RUNDIR/system/bzImage-$QUIZ_KERNEL_VERSION \
+  -kernel $RUNDIR/system/bzImage-$_quiz_kver \
     -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,mux=on,id=virtiocon0 \
