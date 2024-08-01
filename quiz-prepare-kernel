@@ -162,16 +162,26 @@ for kver in $kernel_versions ; do
   fi
 
   kcfg=config-$_quiz_kmajor.$_quiz_kminor
-  if [[ ! -f kernel/$kcfg ]] ; then
-    kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
-  fi
-  if [[ ! -f kernel/$kcfg ]] ; then
-    kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
-  fi
-
   if [[ -z $opt_no_config ]] ; then
-    trace "installing config: $kcfg"
-    cp kernel/$kcfg build/kernel/linux-$_quiz_ksrcver/.config
+    working_kcfg=$kcfg
+    if [[ ! -f kernel/$working_kcfg ]] ; then
+      trace "config not found: $working_kcfg"
+      working_kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
+    fi
+    if [[ ! -f kernel/$working_kcfg ]] ; then
+      trace "config not found: $working_kcfg"
+      working_kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
+    fi
+    if [[ ! -f kernel/$working_kcfg ]] ; then
+      trace "config not found: $working_kcfg"
+      fatal "no usable config found!"
+    fi
+    if [[ $kcfg != $working_kcfg ]] ; then
+      trace "specific config not found, using fallback: $working_kcfg"
+    fi
+
+    trace "installing config: $working_kcfg"
+    cp kernel/$working_kcfg build/kernel/linux-$_quiz_ksrcver/.config
   else
     trace "NOT installing config as requested"
   fi
