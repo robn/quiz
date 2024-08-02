@@ -19,11 +19,10 @@
 # (installed) and "source version" (source), and also vars for all the pieces
 #
 
-function quiz_kernel_vars () {
-  local kver="${1:-}"
-  if [[ -z $kver ]] ; then
-    fail "no kernel version set. use -k or set QUIZ_KERNEL_VERSION"
-  fi
+# separate function for the pre-cooked parse; used by quiz-prepare-kernel
+# to request "latest in series"
+function _quiz_kernel_vars () {
+  local kver=$1
 
   _quiz_kver=""
   _quiz_ksrcver=""
@@ -40,13 +39,23 @@ function quiz_kernel_vars () {
         ([1-9][0-9]*)               # major
         \.                          # dot sep
         (0|[1-9][0-9]*)             # minor
-        (?:\.(0|[1-9][0-9]*))?      # patch 1+, optionl
+        (?:\.(0|[1-9][0-9]*))?      # patch 1+, optional
         (?:-(rc)([1-9][0-9]*))?     # type & typepatch
       $
     /gx;
-    $pat //= 0;
     print qq{$maj $min $pat $ty $typat}
   ' | read _quiz_kmajor _quiz_kminor _quiz_kpatch _quiz_ktype _quiz_ktype_patch
+
+  return 0
+}
+
+function quiz_kernel_vars () {
+  local kver="${1:-}"
+  if [[ -z $kver ]] ; then
+    fail "no kernel version set. use -k or set QUIZ_KERNEL_VERSION"
+  fi
+
+  _quiz_kernel_vars $kver
 
   if [[ -z $_quiz_kmajor || -z $_quiz_kminor ]] ; then
     fail "'$kver' is not a valid kernel version"
