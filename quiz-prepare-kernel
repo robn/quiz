@@ -34,11 +34,14 @@ trace() {
 }
 
 fail() {
-  trace "FATAL $@"
+  local TEXT=${@:-}
+  if [[ -z $TEXT ]] ; then
+    TEXT="[${BASH_SOURCE[0]}:${BASH_LINENO[0]}: $BASH_COMMAND]"
+  fi
+  trace "FATAL $TEXT"
   exit 1
 }
 trap fail ERR
-
 
 RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config

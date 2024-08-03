@@ -27,7 +27,11 @@ trace() {
 }
 
 fail() {
-  trace "FATAL $@"
+  local TEXT=${@:-}
+  if [[ -z $TEXT ]] ; then
+    TEXT="[${BASH_SOURCE[0]}:${BASH_LINENO[0]}: $BASH_COMMAND]"
+  fi
+  trace "FATAL $TEXT"
   exit 1
 }
 trap fail ERR
@@ -58,8 +62,13 @@ RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
-opt_new=0
+# take the default kernel version from the last configured version
 opt_kernel=""
+if [[ -f config.log ]] ; then
+  opt_kernel=$(grep ^LINUX_VERSION= config.log | cut -f2 -d"'")
+fi
+
+opt_new=0
 
 OPTIND=1
 while getopts "k:h" opt

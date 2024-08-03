@@ -30,7 +30,11 @@ trace() {
 }
 
 fail() {
-  trace "FATAL $@"
+  local TEXT=${@:-}
+  if [[ -z $TEXT ]] ; then
+    TEXT="[${BASH_SOURCE[0]}:${BASH_LINENO[0]}: $BASH_COMMAND]"
+  fi
+  trace "FATAL $TEXT"
   exit 1
 }
 trap fail ERR
@@ -128,7 +132,7 @@ trace "starting microvm"
 qemu-system-x86_64 \
 	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
 	-enable-kvm \
-		-cpu host -m 2G -smp 2 \
+		-cpu host -m 16G -smp 6 \
   -kernel $RUNDIR/system/bzImage-$_quiz_kver \
     -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
