@@ -78,3 +78,34 @@ function quiz_kernel_vars () {
     _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype$_quiz_ktype_patch
   fi
 }
+
+function quiz_kernel_best_available () {
+  local kver="${1:-}"
+  if [[ -z $kver ]] ; then
+    fail "no kernel version set. use -k or set QUIZ_KERNEL_VERSION"
+  fi
+
+  _quiz_bzimage=""
+
+  quiz_kernel_vars $kver
+
+  local bzimage=$RUNDIR/system/bzImage-$kver
+  if [[ ! -e $bzimage ]] ; then
+    if [[ $kver = $_quiz_kver ]] ; then
+      fail "no kernel available: $kver"
+    fi
+    _quiz_kernel_vars $kver
+    kver=$(ls $RUNDIR/system/bzImage-$_quiz_kmajor.$_quiz_kminor.* | cut -f2- -d- | sort -rV | head -1)
+    bzimage=$RUNDIR/system/bzImage-$kver
+  fi
+  if [[ ! -e $bzimage ]] ; then
+    fail "no kernel available: $kver"
+  fi
+  trace "using kernel: $(basename $bzimage)"
+
+  quiz_kernel_vars $kver
+
+  _quiz_bzimage=$bzimage
+}
+
+# vim: ft=bash

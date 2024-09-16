@@ -85,7 +85,7 @@ if [[ $# -lt 1 ]] ; then
   usage
 fi
 
-quiz_kernel_vars ${opt_kernel:-$QUIZ_KERNEL_VERSION}
+quiz_kernel_best_available ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 
 case "$1" in
   configure) do_configure "${@:2}" ;;
