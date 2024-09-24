@@ -142,17 +142,24 @@ for kver in $kernel_versions ; do
 
   case $_quiz_ktype in
   release)
+    ksrctype=tar
     ktar=linux-$_quiz_ksrcver.tar.xz
     kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$ktar
     kzopt=J
     ;;
   rc)
+    ksrctype=tar
     ktar=linux-$_quiz_ksrcver.tar.gz
     kurl=https://git.kernel.org/torvalds/t/$ktar
     kzopt=z
     ;;
+  next)
+    ksrctype=git
+    kgiturl=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    kgittag=next-$_quiz_ktype_patch # XXX is this kinda $_quiz_ksrcver?
+    ;;
   *)
-    fail "unknown kernel source type $_quiz_type"
+    fail "unknown kernel version type: $_quiz_ktype"
   esac
 
   trace "preparing build: $_quiz_kver ($_quiz_ktype)"
@@ -160,17 +167,36 @@ for kver in $kernel_versions ; do
   mkdir -p build
   if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
     trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
+    if [[ $ksrctype == 'git' ]] ; then
+      trace "cleaning up git dir: build/kernel/linux-$_quiz_ksrcver"
+      git -C build/kernel/linux-$_quiz_ksrcver -fdx
+    fi
   else
     trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
     mkdir -p build/kernel
     pushd build/kernel > /dev/null
-    if [[ -f $ktar ]] ; then
-      trace "using existing tarball: $ktar"
-    else
-      trace "downloading: $kurl"
-      curl -# -fOL $kurl
-    fi
-    tar xf$kzopt $ktar
+    case $ksrctype in
+    tar)
+      if [[ -f $ktar ]] ; then
+        trace "using existing tarball: $ktar"
+      else
+        trace "downloading: $kurl"
+        curl -# -fOL $kurl
+      fi
+      tar xf$kzopt $ktar
+      ;;
+    git)
+      trace "cloning: $kgittag @ $kgiturl"
+      git clone \
+        --config advice.detachedHead=false \
+        --depth 1 \
+        --branch $kgittag \
+          $kgiturl linux-$_quiz_ksrcver
+      ;;
+    *)
+      fail "unknown kernel source type: $ksrctype"
+      ;;
+    esac
     popd > /dev/null
   fi
 

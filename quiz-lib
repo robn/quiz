@@ -36,11 +36,11 @@ function _quiz_kernel_vars () {
   echo $kver | perl -nE '
     ($maj, $min, $pat, $ty, $typat) = m/
       ^
-        ([1-9][0-9]*)               # major
-        \.                          # dot sep
-        (0|[1-9][0-9]*)             # minor
-        (?:\.(0|[1-9][0-9]*))?      # patch 1+, optional
-        (?:-(rc)([1-9][0-9]*))?     # type & typepatch
+        ([1-9][0-9]*)                   # major
+        \.                              # dot sep
+        (0|[1-9][0-9]*)                 # minor
+        (?:\.(0|[1-9][0-9]*))?          # patch 1+, optional
+        (?:-(rc|next)-?([1-9][0-9]*))?  # type & typepatch
       $
     /gx;
     print qq{$maj $min $pat $ty $typat}
@@ -76,6 +76,9 @@ function quiz_kernel_vars () {
   elif [[ $_quiz_ktype == "rc" ]] ; then
     _quiz_kver=$_quiz_kmajor.$_quiz_kminor.0-$_quiz_ktype$_quiz_ktype_patch
     _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype$_quiz_ktype_patch
+  elif [[ $_quiz_ktype == "next" ]] ; then
+    _quiz_kver=$_quiz_kmajor.$_quiz_kminor.0-$_quiz_ktype-$_quiz_ktype_patch
+    _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype-$_quiz_ktype_patch
   fi
 }
 
