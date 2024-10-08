@@ -1,0 +1,322 @@
+#!/usr/bin/env bash
+
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+# Copyright (c) 2023, Rob Norris <robn@despairlabs.com>
+
+set -uo pipefail
+
+usage() {
+  cat <<EOF
+cleanup quiz build, work and other outdated artifacts
+usage: quiz-cleanup [opts]
+
+options:
+  -k              remove build and installed files for kernel
+  -K              remove build and installed files for all but newest
+                    kernel within series
+  -D              actually delete things; without just lists things
+                    that would be deleted
+  -h              this help
+EOF
+  exit 1
+}
+
+trace() {
+  local STAMP=$(date +%Y%m%d-%H:%M:%S)
+  echo "[quiz-cleanup] $STAMP $@" >&2
+}
+
+fail() {
+  local TEXT=${@:-}
+  if [[ -z $TEXT ]] ; then
+    TEXT="[${BASH_SOURCE[0]}:${BASH_LINENO[0]}: $BASH_COMMAND]"
+  fi
+  trace "FATAL $TEXT"
+  exit 1
+}
+trap fail ERR
+
+RUNDIR=$(realpath $(dirname $0))
+source $RUNDIR/quiz-config
+source $RUNDIR/quiz-lib
+
+opt_kernel=""
+opt_old_kernels=""
+opt_delete=""
+
+OPTIND=1
+while getopts "k:KDh" opt
+do
+  case "$opt" in
+    'k') opt_kernel=$OPTARG ;;
+    'K') opt_old_kernels=1 ;;
+    'D') opt_delete=1 ;;
+    'h') usage ;;
+    *) exit 1 ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
+cd $RUNDIR
+
+if [[ -n $opt_kernel && -n $opt_old_kernels ]] ; then
+  fail "invalid kernel version options; can't use -k and -K together"
+fi
+
+function find_all_kernels () {
+  (
+    ls system/bzImage-* | grep -E -- '-[0-9]+\.[0-9]+\.[0-9]+$' | cut -f2 -d-
+    ls system/work/lib/modules | grep -E -- '^[0-9]+\.[0-9]+\.[0-9]+$'
+    ls -d system/work/usr/local/src/*/* | grep -oE -- '/[0-9]+\.[0-9]+\.[0-9]+$' | cut -f2 -d/
+    ls -d build/kernel/linux-* | grep -oE -- '[0-9]+\.[0-9]+\.[0-9]+'
+  ) | sort -V | uniq | tac
+}
+
+all_kernels=$(find_all_kernels)
+cleanup_kernels=""
+keep_kernels=""
+
+if [[ -n $opt_kernel ]] ; then
+  for k in $all_kernels ; do
+    if [[ $k == $opt_kernel ]] ; then
+      cleanup_kernels=$opt_kernel
+    fi
+  done
+fi
+
+if [[ -z $cleanup_kernels ]] ; then
+  min_kernels=""
+  if [[ -n $opt_kernel ]] ; then
+    min_kernels=$opt_kernel
+  else
+    min_kernels=$(echo $all_kernels | xargs -n1 echo | cut -f1-2 -d. | sort -V | uniq )
+  fi
+  for kmin in $min_kernels ; do
+    first=0
+    for k in $all_kernels ; do
+      if [[ $(echo $k | cut -f1-2 -d.) == $kmin ]] ; then
+        if [[ $first -eq 0 ]] ; then
+          keep_kernels="$keep_kernels $k"
+          first=1
+        else
+          cleanup_kernels="$cleanup_kernels $k"
+        fi
+      fi
+    done
+  done
+fi
+
+if [[ -z $cleanup_kernels ]] ; then
+  fail "no matching kernels found, nothing to do!"
+fi
+
+trace "will cleanup kernels:$cleanup_kernels"
+if [[ -n $keep_kernels ]] ; then
+  trace "keeping kernels:$keep_kernels"
+fi
+
+for k in $cleanup_kernels ; do
+  (
+    ls system/bzImage-$k || true
+    ls -d system/work/usr/lib/modules/$k || true
+    ls -d system/work/usr/local/src/*/$k || true
+    ls -d build/kernel/linux-$k* || true
+  ) 2>/dev/null | sort | while read d ; do
+    if [[ -n $opt_delete ]] ; then
+      trace "deleting: $d"
+      rm -rf $d
+    else
+      trace "would delete: $d"
+    fi
+  done
+done
+
+exit
+
+kernel_versions=""
+if [[ -n $opt_kernel ]] ; then
+  kernel_versions="$opt_kernel"
+else
+  kernel_version=
+
+if [[ -n $opt_all_kernels ]] ; then
+    opt_kernel=$(ls kernel/config-* | cut -d- -f2 | sort -V)
+fi
+
+makeopts=""
+if [[ -n $opt_llvm ]] ; then
+  IFS=:
+  best_clang=$(find $PATH -maxdepth 1 -executable -name "clang-??" -print | \
+    sed -Ee 's/^.+-//' | sort -r | head -1)
+  unset IFS
+  if [[ -z "$best_clang" ]] ; then
+    trace "no specific clang found, setting LLVM=1"
+    best_clang=1
+  else
+    trace "found clang-$best_clang, setting LLVM=-$best_clang"
+    best_clang="-$best_clang"
+  fi
+  makeopts="$makeopts LLVM=$best_clang"
+fi
+
+declare -A kernel_sumfile
+
+kernel_versions=""
+for kver in $opt_kernel ; do
+  _quiz_kernel_vars $kver
+  if [[ $_quiz_kmajor && $_quiz_kminor && -z $_quiz_kpatch ]] ; then
+    if [[ -z ${kernel_sumfile[$_quiz_kmajor]:-} ]] ; then
+      sumfile=build/kernel/sha256sums.$_quiz_kmajor
+      trace "fetching list of available kernels for v$_quiz_kmajor.x"
+      if [[ ! -e $sumfile ]] ; then
+        touch --date=@0 $sumfile
+      fi
+      curl -# -f -o $sumfile -z $sumfile -R \
+        https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/sha256sums.asc
+      kernel_sumfile[$_quiz_kmajor]=$sumfile
+    fi
+    latest=$(cat ${kernel_sumfile[$_quiz_kmajor]} | \
+      sed -Ene "/linux-.+\.tar.xz/ { s/.*linux-($kver\.[0-9]+)\.tar\.xz/\1/ p }" | tail -1)
+    if [[ -z $latest ]] ; then
+      trace "no available kernel for $kver"
+      kver=""
+    else
+      trace "will build $latest for $kver"
+      kver=$latest
+    fi
+  fi
+  if [[ $kver ]] ; then
+    kernel_versions="$kernel_versions $kver"
+  fi
+done
+
+kernel_versions=$(echo $kernel_versions | xargs -n1 | sort -V | uniq | xargs)
+trace "will build kernel versions: $kernel_versions"
+
+for kver in $kernel_versions ; do
+  quiz_kernel_vars $kver
+
+  case $_quiz_ktype in
+  release)
+    ksrctype=tar
+    ktar=linux-$_quiz_ksrcver.tar.xz
+    kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$ktar
+    kzopt=J
+    ;;
+  rc)
+    ksrctype=tar
+    ktar=linux-$_quiz_ksrcver.tar.gz
+    kurl=https://git.kernel.org/torvalds/t/$ktar
+    kzopt=z
+    ;;
+  next)
+    ksrctype=git
+    kgiturl=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    kgittag=next-$_quiz_ktype_patch # XXX is this kinda $_quiz_ksrcver?
+    ;;
+  *)
+    fail "unknown kernel version type: $_quiz_ktype"
+  esac
+
+  trace "preparing build: $_quiz_kver ($_quiz_ktype)"
+
+  mkdir -p build
+  if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
+    trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
+    if [[ $ksrctype == 'git' ]] ; then
+      trace "cleaning up git dir: build/kernel/linux-$_quiz_ksrcver"
+      git -C build/kernel/linux-$_quiz_ksrcver -fdx
+    fi
+  else
+    trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
+    mkdir -p build/kernel
+    pushd build/kernel > /dev/null
+    case $ksrctype in
+    tar)
+      if [[ -f $ktar ]] ; then
+        trace "using existing tarball: $ktar"
+      else
+        trace "downloading: $kurl"
+        curl -# -fOL $kurl
+      fi
+      tar xf$kzopt $ktar
+      ;;
+    git)
+      trace "cloning: $kgittag @ $kgiturl"
+      git clone \
+        --config advice.detachedHead=false \
+        --depth 1 \
+        --branch $kgittag \
+          $kgiturl linux-$_quiz_ksrcver
+      ;;
+    *)
+      fail "unknown kernel source type: $ksrctype"
+      ;;
+    esac
+    popd > /dev/null
+  fi
+
+  kcfg=config-$_quiz_kmajor.$_quiz_kminor
+  if [[ -z $opt_no_config ]] ; then
+    working_kcfg=$kcfg
+    if [[ ! -f kernel/$working_kcfg ]] ; then
+      trace "config not found: $working_kcfg"
+      working_kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
+    fi
+    if [[ ! -f kernel/$working_kcfg ]] ; then
+      trace "config not found: $working_kcfg"
+      working_kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
+    fi
+    if [[ ! -f kernel/$working_kcfg ]] ; then
+      trace "config not found: $working_kcfg"
+      fatal "no usable config found!"
+    fi
+    if [[ $kcfg != $working_kcfg ]] ; then
+      trace "specific config not found, using fallback: $working_kcfg"
+    fi
+
+    trace "installing config: $working_kcfg"
+    cp kernel/$working_kcfg build/kernel/linux-$_quiz_ksrcver/.config
+  else
+    trace "NOT installing config as requested"
+  fi
+
+  pushd build/kernel/linux-$_quiz_ksrcver > /dev/null
+
+  if [[ -n $opt_modify_config ]] ; then
+    trace "updating config from commandline switches"
+    scripts/config $opt_modify_config
+  fi
+
+  trace "compiling config: $_quiz_ksrcver"
+
+  make -s -j6 olddefconfig $makeopts
+
+  if [[ -z $opt_no_build ]] ; then
+    trace "building kernel: $_quiz_ksrcver"
+    make -j6 $makeopts
+  else
+    trace "NOT building kernel as requested"
+  fi
+
+  popd > /dev/null
+
+  if [[ -n $opt_update_config ]] ; then
+    trace "updating standard config: $kcfg"
+    cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$kcfg
+  fi
+
+  if [[ -z $opt_no_build ]] ; then
+    trace "moving completed kernel into quiz system dir: $_quiz_kver"
+
+    mkdir -p system
+    cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
+  fi
+
+  trace "build finished: $_quiz_kver"
+done
+
+# vim: ft=bash
