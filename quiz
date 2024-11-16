@@ -110,16 +110,27 @@ for p in $profiles ; do
   fi
 done
 
-# if they wanted a specific command, set up a run script for init to execute
+# set up a run script for init to execute
+trace "creating run script"
 rm -f $RUNDIR/system/init/.quiz/run
 if [[ $# -ne 0 ]] ; then
-  trace "creating run script"
-  echo "$@" > $RUNDIR/system/init/.quiz/run
+  cat <<EOF > $RUNDIR/system/init/.quiz/run
+echo "quiz: starting user program" >> /dev/kmsg
+$@
+EOF
   if [[ $opt_shell ]] ; then
-    echo "exec /bin/bash" >> $RUNDIR/system/init/.quiz/run
+    cat <<EOF >> $RUNDIR/system/init/.quiz/run
+echo "quiz: user program done, dropping to shell" >> /dev/kmsg
+exec /bin/bash
+EOF
   fi
-  chmod +x $RUNDIR/system/init/.quiz/run
+else
+  cat <<EOF > $RUNDIR/system/init/.quiz/run
+echo "quiz: starting shell" >> /dev/kmsg
+/bin/bash
+EOF
 fi
+chmod +x $RUNDIR/system/init/.quiz/run
 
 trace "starting microvm"
 

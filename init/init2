@@ -62,12 +62,5 @@ if [ -r /.quiz/init.profile ] ; then
   . /.quiz/init.profile
 fi
 
-echo "quiz: starting user program" >> /dev/kmsg
-
 # start a "real" init, and run our program
-if [ -r /.quiz/run ] ; then
-  exec tini -vwsg /bin/sh -- -x /.quiz/run
-fi
-
-# no program, just go to a shell
-exec tini -vwsg /bin/bash
+exec tini -vwsg /bin/sh -- /.quiz/run
