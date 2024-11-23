@@ -169,7 +169,7 @@ for kver in $kernel_versions ; do
     trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
     if [[ $ksrctype == 'git' ]] ; then
       trace "cleaning up git dir: build/kernel/linux-$_quiz_ksrcver"
-      git -C build/kernel/linux-$_quiz_ksrcver -fdx
+      git -C build/kernel/linux-$_quiz_ksrcver clean -fdx
     fi
   else
     trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
