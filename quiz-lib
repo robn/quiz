@@ -80,6 +80,19 @@ function quiz_kernel_vars () {
     _quiz_kver=$_quiz_kmajor.$_quiz_kminor.0-$_quiz_ktype-$_quiz_ktype_patch
     _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype-$_quiz_ktype_patch
   fi
+
+  if [[ -n "${QUIZ_DEBUG_KERNEL_VARS:-}" ]] ; then
+    cat 2>&1 <<EOF
+DEBUG: exploded kernel version: $kver
+       _quiz_kmajor:      $_quiz_kmajor
+       _quiz_kminor:      $_quiz_kminor
+       _quiz_kpatch:      $_quiz_kpatch
+       _quiz_ktype:       $_quiz_ktype
+       _quiz_ktype_patch: $_quiz_ktype_patch
+       _quiz_kver:        $_quiz_kver
+       _quiz_ksrcver:     $_quiz_ksrcver
+EOF
+  fi
 }
 
 function quiz_kernel_best_available () {
@@ -92,25 +105,34 @@ function quiz_kernel_best_available () {
 
   quiz_kernel_vars $kver
 
-  local bzimage=$RUNDIR/system/bzImage-$kver
-  if [[ ! -e $bzimage ]] ; then
-    if [[ $kver = $_quiz_kver ]] ; then
-      fail "no kernel available: $kver"
+  if [[ $kver = $_quiz_kver ]] ; then
+    # canonical kernel version specified, must use only that version
+    local bzimage=$RUNDIR/system/bzImage-$_quiz_kver
+    if [[ ! -e $bzimage ]] ; then
+      fail "kernel image not found: $_quiz_kver"
     fi
-    _quiz_kernel_vars $kver
-    kver=$(ls $RUNDIR/system/bzImage-* | \
-      grep -E "bzImage-$_quiz_kmajor\.$_quiz_kminor\.[0-9]+$" | \
-      cut -f2- -d- | sort -rV | head -1)
-    bzimage=$RUNDIR/system/bzImage-$kver
+    _quiz_bzimage=$bzimage
+  else
+    # partial version specified, choose from best available
+    local candidates="$(find $RUNDIR/system -maxdepth 1 -name "bzImage-$_quiz_ksrcver.*" | cut -f2- -d- | sort -V)"
+    local best=""
+    for candidate in $candidates ; do
+      quiz_kernel_vars $candidate
+      if [[ $_quiz_ktype != "release" ]] ; then
+        trace "skipped non-release kernel image: $_quiz_kver"
+      else
+        best="$_quiz_kver"
+        trace "matched release kernel image: $_quiz_kver"
+      fi
+    done
+    if [[ -z $best ]] ; then
+      fail "matching kernel image not found: $kver"
+    fi
+    quiz_kernel_vars $best
+    _quiz_bzimage=$RUNDIR/system/bzImage-$_quiz_kver
   fi
-  if [[ ! -e $bzimage ]] ; then
-    fail "no kernel available: $kver"
-  fi
-  trace "using kernel: $(basename $bzimage)"
 
-  quiz_kernel_vars $kver
-
-  _quiz_bzimage=$bzimage
+  trace "using kernel: $_quiz_kver"
 }
 
 # vim: ft=bash
