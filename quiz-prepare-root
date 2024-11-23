@@ -56,7 +56,8 @@ mmdebstrap \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
     --customize-hook='mkdir "$1"/mnt/quiz-init "$1"/mnt/quiz-system "$1"/mnt/quiz-user' \
     --customize-hook='mkdir "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
-  $QUIZ_DEBIAN_RELEASE $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2
+  $QUIZ_DEBIAN_RELEASE $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.new.ext2
+mv -vf $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.new.ext2 $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2
 
 trace "done"
 
