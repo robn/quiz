@@ -47,7 +47,7 @@ shift $(expr $OPTIND - 1)
 trace "building root image"
 
 zfs_extras=libtirpc3,libjemalloc2
-zfstest_extras=bc,bzip2,cpio,file,fio,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo
+zfstest_extras=bc,bzip2,cpio,file,fio,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo,xxhash
 debug_extras=jq,gdb,strace,fio,bpftrace,linux-perf,xxd,blktrace,mdadm
 
 mmdebstrap \
