@@ -205,11 +205,11 @@ for kver in $kernel_versions ; do
     working_kcfg=$kcfg
     if [[ ! -f kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
-      working_kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | tail -1)
+      working_kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | sort -V | tail -1)
     fi
     if [[ ! -f kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
-      working_kcfg=$(ls kernel/config-* | cut -f2 -d/ | tail -1)
+      working_kcfg=$(ls kernel/config-* | cut -f2 -d/ | sort -V | tail -1)
     fi
     if [[ ! -f kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
