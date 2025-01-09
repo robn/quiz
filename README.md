@@ -30,6 +30,10 @@ Running (part of) the ZFS test suite:
 
 [![quiz ZFS test suite run](demo/zfs-test.gif)](https://asciinema.org/a/kZ5TeTaqH7aU2xuJHSdDDu4at)
 
+The new interactive mode, which runs tmux inside the VM and makes it much easier to look around.
+
+[![interactive quiz with tmux](demo/quiz-tmux.gif)](https://asciinema.org/a/Ichfxm2Nojb8rXJzwjmJ9UPbj)
+
 ## Setup
 
 ### Install prerequisites
@@ -158,8 +162,6 @@ Note that profiles currently have no way to influence the kernel config or the r
   * mdadm stuff (fake error environments)
   * pool create/import
 * a good way to get stuff back to the host (logs, test artifacts, etc)
-* multiple terminal support
-  * right now there's only thing; even finding a way to run tmux inside would probably do
 * multi-instance
   * this should really be something you use inside your OpenZFS worktree, so that they don't trample on each other
 * cleaner lines of integration with host
