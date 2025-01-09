@@ -47,12 +47,12 @@ shift $(expr $OPTIND - 1)
 trace "building root image"
 
 zfs_extras=libtirpc3,libjemalloc2,libasan8
-zfstest_extras=bc,bzip2,cpio,file,fio,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo,xxhash
+zfstest_extras=ksh,bc,bzip2,cpio,file,fio,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo,xxhash
 debug_extras=jq,gdb,strace,fio,bpftrace,linux-perf,xxd,blktrace,mdadm
 
 mmdebstrap \
   --variant=minbase \
-  --include=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,ksh,tmux,cryptsetup,$zfs_extras,$zfstest_extras,$debug_extras \
+  --include=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,tmux,cryptsetup,$zfs_extras,$zfstest_extras,$debug_extras \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
     --customize-hook='mkdir "$1"/mnt/quiz-init "$1"/mnt/quiz-system "$1"/mnt/quiz-user' \
     --customize-hook='mkdir "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
