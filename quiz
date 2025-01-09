@@ -18,6 +18,8 @@ options:
         list of profiles to include in this run
   -k <kernel>
         kernel to use for this run
+  -r <runcontrol>
+        use the given runcontrol (default: auto)
   -S    drop into shell after run script completes
   -h    this help
 EOF
@@ -46,14 +48,16 @@ source $RUNDIR/quiz-lib
 opt_kernel=""
 opt_profile="$QUIZ_PROFILE"
 opt_shell=""
+opt_rc="auto"
 
 OPTIND=1
-while getopts "k:p:Sh" opt
+while getopts "k:p:Sr:h" opt
 do
   case "$opt" in
     'k') opt_kernel=$OPTARG ;;
     'p') opt_profile=$OPTARG ;;
     'S') opt_shell=1 ;;
+    'r') opt_rc=$OPTARG ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -66,6 +70,20 @@ quiz_kernel_best_available ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 rm -rf $RUNDIR/system/init
 mkdir -p $RUNDIR/system/init/.quiz
 install -m 755 init/init2 $RUNDIR/system/init/.quiz/init2
+
+# rc selection
+rc=$opt_rc
+if [[ $opt_rc = "auto" ]] ; then
+  rc=raw
+  if [[ -t 1 ]] ; then
+    rc=tmux
+  fi
+fi
+if [[ ! -d $RUNDIR/rc/$rc ]] ; then
+  fail "unknown rc: $rc"
+fi
+trace "using rc: $rc"
+rsync -a $RUNDIR/rc/$rc/ $RUNDIR/system/init/.quiz/rc
 
 # XXX ensure user dir exists
 mkdir -p $RUNDIR/system/user
@@ -134,10 +152,18 @@ chmod +x $RUNDIR/system/init/.quiz/run
 
 trace "starting microvm"
 
-# -chardev socket,path=quiz-socket,server=on,wait=on,id=virtiocon0 \
-#  -chardev pty,id=virtiocon0 \
-
-# -append "earlyprintk=hvc0 console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
+#
+# XXX note to self. every time I've tried to change the console type to
+#     something else to get better support for acting like a true terminal, its
+#     failed. Ultimately, they all have basically no smarts at all, and are all
+#     harder to access from the host than stdio (at least in the transient way
+#     I want to). Don't bother.
+#
+#     The key to every UI pleasantry has been to allocate a pseudo-terminal
+#     inside and build off of that. I think that SIGWINCH passthrough is the
+#     only true missing piece at this point, and then all would be well.
+#       -- robn, 2025-01-09
+#
 
 # this is hand rolled from my early tests. seems right but its a lot of mess
 qemu-system-x86_64 \
@@ -147,7 +173,7 @@ qemu-system-x86_64 \
   -kernel $_quiz_bzimage \
     -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
-  -chardev stdio,mux=on,id=virtiocon0 \
+  -chardev stdio,mux=on,signal=off,id=virtiocon0 \
   -mon chardev=virtiocon0,mode=readline \
   -device virtio-serial-device \
   -device virtconsole,chardev=virtiocon0 \

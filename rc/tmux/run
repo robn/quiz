@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# "tmux" rc, for easier interactive use.
+#
+# we run tmux inside the VM, with two windows:
+#   0: kernel output (dmesg)
+#   1: actual program run
+#
+# this script gets tmux launched, with the the windows set up. rc/tmux/main is
+# what actually gets run in the "main" window
+
+# XXX path hack. /etc/profile includes sbin based on `id -u`, which the ztest
+#     profile overrides. probably need an explicit environment file to source
+#     in here (and profiles files should be overlaid, but that's a different
+#     and only loosely-related problem -- robn, 2025-01-09
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export PATH
+
+# disable kernel output direct to console, so it doesn't scribble all over tmux
+# itself. dmesg is then run in the first window to get the log in a more
+# contained fashion
+dmesg -n 1
+
+# start tmux. the config file is mostly for styles and colours. we force
+# 256-color and unicode support here, because my terminal handles it and in
+# 2025, yours should too.
+tmux -2u -f /.quiz/rc/tmux.conf \
+  new-session -n 'dmesg' dmesg -w \; \
+  new-window -n 'run' /.quiz/rc/main \; \

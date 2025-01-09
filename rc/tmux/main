@@ -1,0 +1,56 @@
+#!/bin/sh
+
+# "tmux" rc, for easier interactive use.
+#
+# this script is run inside the "run" window, see rc/tmux/run for more info.
+#
+# this sets up a couple of quality-of-life improvements for the program run:
+#
+# - kernel messages are also displayed here, so they appear interleaved with
+#   the program output, which is extremely useful if you're like me and do
+#   a lot of print debugging in the kernel (which is like 90% of the reason
+#   quiz even exists)
+#
+# - after the program run, waits for the user to do something before detaching
+#   (and so exiting the VM). the user may want to examine the output before
+#   exiting, but we also want to preserve the conceit that the program run and
+#   the VM lifetime is the same. Without this, the run window would close,
+#   losing the output, and leaving the user on the kernel log window. Instead,
+#   we tell them where they're at, give them an instruction, and on exit,
+#   call `tmux detach` to tear down the VM.
+
+dmesg_pid=
+
+finish() {
+  # from this point, all ways out destroy the world
+  trap 'tmux detach' INT HUP TERM EXIT
+
+  # no more kernel messages after the run; they're still on the log window
+  if [ -n $dmesg_pid ] ; then
+    kill -INT $dmesg_pid
+  fi
+
+  # a nice message
+  echo
+  echo
+  echo "[quiz run finished. Ctrl-C or detach session to exit]"
+  echo
+
+  # sleep "forever" (68 years or so)
+  sleep 2147483648 # 68 years or so
+
+  # hello, future
+  exit 0
+}
+
+# all user shutdowns should go to the finish stage
+trap finish INT HUP TERM
+
+# emit new kernel messages
+dmesg -W & dmesg_pid=$!
+
+# run the user program!
+/bin/sh -- /.quiz/run
+
+# done
+finish

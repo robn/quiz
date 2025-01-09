@@ -62,5 +62,5 @@ if [ -r /.quiz/init.profile ] ; then
   . /.quiz/init.profile
 fi
 
-# start a "real" init, and run our program
-exec tini -vwsg /bin/sh -- /.quiz/run
+# start a "real" init and hand control to rc
+exec tini -vwsg -- /bin/sh -l -- /.quiz/rc/run

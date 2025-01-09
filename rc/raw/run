@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# "raw" rc. just the kernel and program output, all in one, good for piping and
+# redirecting.
+
+# XXX path hack. /etc/profile includes sbin based on `id -u`, which the ztest
+#     profile overrides. probably need an explicit environment file to source
+#     in here (and profiles files should be overlaid, but that's a different
+#     and only loosely-related problem -- robn, 2025-01-09
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export PATH
+
+# In order for signals to be delivered, we need to run the program in a pty.
+# Amazingly, I couldn't find a single simple program that would allocate one
+# and run the program. Turns out that `script` is pretty close though, if we
+# just dump its "log" elsewhere. Maybe that's the "single simple program" after
+# all.
+exec script -q -e \
+  -c '/bin/sh -- /.quiz/run' \
+  /dev/null
