@@ -44,13 +44,11 @@ On a Debian 12 (bookworm) system you’ll need at least:
 
 Run `quiz-prepare-kernel`. This will grab kernel source, compile it with a very minimal config to support only what’s needed for the microvm, and install it into the system dir.
 
+It will also set up the "work" dir, which is where kernel modules build artifacts and whatever else gets "installed" into the VM.
+
 ### Build the root image
 
 Run `quiz-prepare-root`. This will generate a barely-there Debian root image.
-
-### Build the work dir
-
-Run `quiz-prepare-work`. This sets up a chunk of host filesystem that will be mapped into the VM, and is where the OpenZFS modules and related development programs can be stored.
 
 ### Build OpenZFS
 
