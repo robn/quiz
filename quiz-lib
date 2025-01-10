@@ -81,7 +81,7 @@ function quiz_kernel_vars () {
     _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype-$_quiz_ktype_patch
   fi
 
-  if [[ -n "${QUIZ_DEBUG_KERNEL_VARS:-}" ]] ; then
+  if [[ -n "${QUIZ_DEBUG_VARS:-}" ]] ; then
     cat 2>&1 <<EOF
 DEBUG: exploded kernel version: $kver
        _quiz_kmajor:      $_quiz_kmajor
@@ -133,6 +133,58 @@ function quiz_kernel_best_available () {
   fi
 
   trace "using kernel: $_quiz_kver"
+}
+
+function quiz_arch_vars () {
+  local arch="${1:-}"
+  if [[ -z $arch ]] ; then
+    fail "no architecture set. use -a or set QUIZ_ARCH"
+  fi
+
+  _quiz_arch=""
+  _quiz_arch_kernel=""
+  _quiz_arch_debian=""
+  _quiz_arch_qemu=""
+  _quiz_arch_prefix=""
+  _quiz_arch_native=""
+
+  case "$arch" in
+    x86_64)
+      _quiz_arch=x86_64
+      _quiz_arch_kernel=x86
+      _quiz_arch_debian=amd64
+      _quiz_arch_qemu=x86_64
+      _quiz_arch_prefix=x86_64-linux-gnu-
+      ;;
+    ppc64)
+      _quiz_arch=ppc64
+      _quiz_arch_kernel=powerpc
+      _quiz_arch_debian=ppc64
+      _quiz_arch_qemu=ppc64
+      _quiz_arch_prefix=powerpc64-linux-gnu-
+      ;;
+    *)
+      fail "no support for architecture: $arch"
+      ;;
+  esac
+
+  if [[ $(uname -m) == $_quiz_arch ]] ; then
+    _quiz_arch_native=1
+  fi
+
+  if [[ -n "${QUIZ_DEBUG_VARS:-}" ]] ; then
+    cat 2>&1 <<EOF
+DEBUG: exploded arch vars: $arch
+       _quiz_arch:        $_quiz_arch
+       _quiz_arch_kernel: $_quiz_arch_kernel
+       _quiz_arch_debian: $_quiz_arch_debian
+       _quiz_arch_qemu:   $_quiz_arch_qemu
+       _quiz_arch_prefix: $_quiz_arch_prefix
+       _quiz_arch_native: $_quiz_arch_native
+EOF
+  fi
+
+  trace "using arch: $_quiz_arch"
 }
 
 # vim: ft=bash
