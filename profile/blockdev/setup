@@ -11,7 +11,7 @@ for n in $(seq 0 $(($QUIZ_BLOCKDEV_COUNT - 1))) ; do
   fallocate -zl $QUIZ_BLOCKDEV_SIZE $RUNDIR/system/blockdev/quizb$n
   QUIZ_QEMU_OPTS="$QUIZ_QEMU_OPTS \
     -drive id=quizb$n,file=$RUNDIR/system/blockdev/quizb$n,format=raw,if=none \
-    -device virtio-blk-device,drive=quizb$n,serial=quizb$n \
+    -device virtio-blk-pci,drive=quizb$n,serial=quizb$n \
   "
 done
 

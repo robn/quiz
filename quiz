@@ -167,7 +167,7 @@ trace "starting microvm"
 
 # this is hand rolled from my early tests. seems right but its a lot of mess
 qemu-system-x86_64 \
-	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off \
+	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off,pcie=on \
 	-enable-kvm \
 		-cpu host -m 16G -smp 6 \
   -kernel $_quiz_bzimage \
@@ -175,18 +175,18 @@ qemu-system-x86_64 \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,mux=on,signal=off,id=virtiocon0 \
   -mon chardev=virtiocon0,mode=readline \
-  -device virtio-serial-device \
+  -device virtio-serial-pci \
   -device virtconsole,chardev=virtiocon0 \
-  -device virtio-balloon-device \
+  -device virtio-balloon-pci \
   -device pvpanic \
   -drive id=root,file=$RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2,format=raw,read-only=on,if=none \
-  -device virtio-blk-device,drive=root,serial=root \
+  -device virtio-blk-pci,drive=root,serial=root \
   -fsdev local,id=quiz-init,path=$RUNDIR/system/init,security_model=none,readonly=on \
-  -device virtio-9p-device,fsdev=quiz-init,mount_tag=quiz-init \
+  -device virtio-9p-pci,fsdev=quiz-init,mount_tag=quiz-init \
   -fsdev local,id=quiz-system,path=$RUNDIR/system/work,security_model=none,readonly=on \
-  -device virtio-9p-device,fsdev=quiz-system,mount_tag=quiz-system \
+  -device virtio-9p-pci,fsdev=quiz-system,mount_tag=quiz-system \
   -fsdev local,id=quiz-user,path=$RUNDIR/system/user,security_model=none,readonly=on \
-  -device virtio-9p-device,fsdev=quiz-user,mount_tag=quiz-user \
+  -device virtio-9p-pci,fsdev=quiz-user,mount_tag=quiz-user \
   $QUIZ_QEMU_OPTS \
 
 trace "done"
