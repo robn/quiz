@@ -281,11 +281,7 @@ for kver in $kernel_versions ; do
     #       -- robn, 2023-07-07
     for d in lib lib64 sbin bin ; do
       mkdir -p system/work/usr/$d
-      if [[ $QUIZ_USR_MERGED ]] ; then
-        ln -sf usr/$d system/work/$d
-      else
-        mkdir -p system/work/$d
-      fi
+      ln -sf usr/$d system/work/$d
     done
     mkdir -p system/work
 

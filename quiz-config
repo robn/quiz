@@ -38,9 +38,4 @@ if [[ -f $RUNDIR/quiz.cfg ]] ; then
   source $RUNDIR/quiz.cfg
 fi
 
-QUIZ_USR_MERGED=0
-if [[ $QUIZ_DEBIAN_RELEASE == "bookworm" ]] ; then
-  QUIZ_USR_MERGED=1
-fi
-
 # vim: ft=bash
