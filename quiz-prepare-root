@@ -12,6 +12,8 @@ usage() {
   cat <<EOF
 create a minimal root filesystem for the quiz microvm
 usage: quiz-prepare-root
+  -a <arch>
+        architecture to prepare root for
 EOF
   exit 1
 }
@@ -33,31 +35,50 @@ trap fail ERR
 
 RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
+source $RUNDIR/quiz-lib
+
+opt_arch=""
 
 OPTIND=1
-while getopts "h" opt
+while getopts "a:h" opt
 do
   case "$opt" in
+    'a') opt_arch=$OPTARG ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
 done
 shift $(expr $OPTIND - 1)
 
+quiz_arch_vars ${opt_arch:-$QUIZ_ARCH}
+quiz_debian_vars
+
 trace "building root image"
 
+# XXX this lists should be source from somewhere else -- robn, 2025-01-10
+quiz_extras=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,tmux,cryptsetup
 zfs_extras=libtirpc3,libjemalloc2,libasan8
-zfstest_extras=ksh,bc,bzip2,cpio,file,fio,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo,xxhash
-debug_extras=jq,gdb,strace,fio,bpftrace,linux-perf,xxd,blktrace,mdadm
+zfstest_extras=ksh,bc,bzip2,cpio,file,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo,xxhash
+debug_extras=jq,gdb,strace,bpftrace,linux-perf,xxd,blktrace,mdadm
+
+# XXX add things back in the can't be in the default lists because they're
+#     not installable from debian unstable right now. this is all a mess, as
+#     you see -- robn, 2025-01-10
+if [[ $_quiz_debian_arch == "amd64" ]] ; then
+  zfstest_extras="$zfstest_extras,fio"
+fi
+
+image_basefile=$_quiz_debian_release.$_quiz_debian_arch
 
 mmdebstrap \
+  --arch=$_quiz_debian_arch \
   --variant=minbase \
-  --include=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,tmux,cryptsetup,$zfs_extras,$zfstest_extras,$debug_extras \
+  --include=$quiz_extras,$zfs_extras,$zfstest_extras,$debug_extras \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
     --customize-hook='mkdir "$1"/mnt/quiz-init "$1"/mnt/quiz-system "$1"/mnt/quiz-user' \
     --customize-hook='mkdir "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
-  $QUIZ_DEBIAN_RELEASE $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.new.ext2
-mv -vf $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.new.ext2 $RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2
+  $_quiz_debian_release $RUNDIR/system/$image_basefile.new.ext2 "$_quiz_debian_mirror"
+mv -vf $RUNDIR/system/$image_basefile.new.ext2 $RUNDIR/system/$image_basefile.ext2
 
 trace "done"
 

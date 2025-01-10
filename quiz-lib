@@ -143,7 +143,6 @@ function quiz_arch_vars () {
 
   _quiz_arch=""
   _quiz_arch_kernel=""
-  _quiz_arch_debian=""
   _quiz_arch_qemu=""
   _quiz_arch_prefix=""
   _quiz_arch_native=""
@@ -152,14 +151,12 @@ function quiz_arch_vars () {
     x86_64)
       _quiz_arch=x86_64
       _quiz_arch_kernel=x86
-      _quiz_arch_debian=amd64
       _quiz_arch_qemu=x86_64
       _quiz_arch_prefix=x86_64-linux-gnu-
       ;;
     ppc64)
       _quiz_arch=ppc64
       _quiz_arch_kernel=powerpc
-      _quiz_arch_debian=ppc64
       _quiz_arch_qemu=ppc64
       _quiz_arch_prefix=powerpc64-linux-gnu-
       ;;
@@ -177,7 +174,6 @@ function quiz_arch_vars () {
 DEBUG: exploded arch vars: $arch
        _quiz_arch:        $_quiz_arch
        _quiz_arch_kernel: $_quiz_arch_kernel
-       _quiz_arch_debian: $_quiz_arch_debian
        _quiz_arch_qemu:   $_quiz_arch_qemu
        _quiz_arch_prefix: $_quiz_arch_prefix
        _quiz_arch_native: $_quiz_arch_native
@@ -185,6 +181,46 @@ EOF
   fi
 
   trace "using arch: $_quiz_arch"
+}
+
+#
+# XXX this are actually more like arch vars, but I'm still not sure where
+#     debian sits in the whole structure, so for now I'm just keeping it
+#     contained -- robn, 2025-01-10
+#
+function quiz_debian_vars () {
+  if [[ -z "${_quiz_arch:-}" ]] ; then
+    fail "internal error: call quiz_arch_vars() first"
+  fi
+
+  _quiz_debian_arch=""
+  _quiz_debian_release=""
+  _quiz_debian_mirror=""
+
+  case "$_quiz_arch" in
+    x86_64)
+      _quiz_debian_arch=amd64
+      _quiz_debian_release=bookworm
+      _quiz_debian_mirror=""
+      ;;
+    ppc64)
+      _quiz_debian_arch=ppc64
+      _quiz_debian_release=unstable
+      _quiz_debian_mirror="[trusted=yes] https://deb.debian.org/debian-ports"
+      ;;
+    *)
+      fail "internal error: debian vars for arch $_quiz_arch not defined"
+      ;;
+  esac
+
+  if [[ -n "${QUIZ_DEBUG_VARS:-}" ]] ; then
+    cat 2>&1 <<EOF
+DEBUG: exploded debian vars for arch: $_quiz_arch
+       _quiz_debian_arch:    $_quiz_debian_arch
+       _quiz_debian_release: $_quiz_debian_release
+       _quiz_debian_mirror:  $_quiz_debian_mirror
+EOF
+  fi
 }
 
 # vim: ft=bash

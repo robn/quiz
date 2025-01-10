@@ -13,10 +13,6 @@ QUIZ_KERNEL_VERSION=6.1
 # local machine architecture
 QUIZ_ARCH=$(uname -m)
 
-# root system to use
-#QUIZ_DEBIAN_RELEASE="bullseye"
-QUIZ_DEBIAN_RELEASE="bookworm"
-
 # default profile set (-p will override)
 QUIZ_PROFILE=""
 

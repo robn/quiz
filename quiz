@@ -16,6 +16,8 @@ usage: quiz [opts] [program [args...]]
 options:
   -p <profile,...>
         list of profiles to include in this run
+  -a <arch>
+        architecture to use for this run
   -k <kernel>
         kernel to use for this run
   -r <runcontrol>
@@ -45,15 +47,17 @@ RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
+opt_arch=""
 opt_kernel=""
 opt_profile="$QUIZ_PROFILE"
 opt_shell=""
 opt_rc="auto"
 
 OPTIND=1
-while getopts "k:p:Sr:h" opt
+while getopts "a:k:p:Sr:h" opt
 do
   case "$opt" in
+    'a') opt_arch=$OPTARG ;;
     'k') opt_kernel=$OPTARG ;;
     'p') opt_profile=$OPTARG ;;
     'S') opt_shell=1 ;;
@@ -64,6 +68,8 @@ do
 done
 shift $(expr $OPTIND - 1)
 
+quiz_arch_vars ${opt_arch:-$QUIZ_ARCH}
+quiz_debian_vars
 quiz_kernel_best_available ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 
 # create init dir and install second stage
@@ -179,7 +185,7 @@ qemu-system-x86_64 \
   -device virtconsole,chardev=virtiocon0 \
   -device virtio-balloon-pci \
   -device pvpanic \
-  -drive id=root,file=$RUNDIR/system/$QUIZ_DEBIAN_RELEASE.ext2,format=raw,read-only=on,if=none \
+  -drive id=root,file=$RUNDIR/system/$_quiz_debian_release.$_quiz_debian_arch.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-pci,drive=root,serial=root \
   -fsdev local,id=quiz-init,path=$RUNDIR/system/init,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-init,mount_tag=quiz-init \
