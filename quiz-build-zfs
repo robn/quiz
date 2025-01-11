@@ -14,9 +14,9 @@ build OpenZFS with options to work well with quiz
 usage: quiz-build-zfs [opts] <configure|make> [program args...]
 
 options:
-  -k <kernel>
-        kernel to use for this run
-  -h    this help
+  -k <kernel>     kernel to use for this run
+  -a <arch>       architecture to build for
+  -h              this help
 EOF
   exit 1
 }
@@ -36,44 +36,23 @@ fail() {
 }
 trap fail ERR
 
-do_configure() {
-  exec ./configure \
-    --with-linux=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
-    --with-linux-obj=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
-    --prefix=/usr/local \
-    --disable-sysvinit \
-    --disable-systemd \
-    --disable-pam \
-    'lt_cv_sys_lib_dlsearch_path_spec=/lib /usr/lib /lib/i686-linux-gnu /usr/lib/x86_64-linux-gnu' \
-    "$@"
-}
-
-do_make() {
-  exec make "$@"
-}
-
-do_make_install() {
-  exec make install \
-    DESTDIR=$RUNDIR/system/work \
-    "$@"
-}
-
 RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
-# take the default kernel version from the last configured version
+opt_arch=""
 opt_kernel=""
+
+# take the default kernel version from the last configured version
 if [[ -f config.log ]] ; then
   opt_kernel=$(grep ^LINUX_VERSION= config.log | cut -f2 -d"'")
 fi
 
-opt_new=0
-
 OPTIND=1
-while getopts "k:h" opt
+while getopts "a:k:h" opt
 do
   case "$opt" in
+    'a') opt_arch=$OPTARG ;;
     'k') opt_kernel=$OPTARG ;;
     'h') usage ;;
     *) exit 1 ;;
@@ -85,17 +64,48 @@ if [[ $# -lt 1 ]] ; then
   usage
 fi
 
+quiz_arch_vars ${opt_arch:-$QUIZ_ARCH}
 quiz_kernel_best_available ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 
+do_configure() {
+  ./configure \
+    --with-linux=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
+    --with-linux-obj=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
+    --prefix=/opt/zfs \
+    --disable-sysvinit \
+    --disable-systemd \
+    --disable-pam \
+    'lt_cv_sys_lib_dlsearch_path_spec=/lib /usr/lib /lib/i686-linux-gnu /usr/lib/x86_64-linux-gnu' \
+    "$@"
+}
+
+do_make() {
+  make "$@"
+}
+
+do_make_install() {
+  kernel_dir=$RUNDIR/system/kernel/$_quiz_arch_kernel
+  make install \
+    INSTALL_PATH=$kernel_dir INSTALL_MOD_PATH=$kernel_dir \
+    DESTDIR=$RUNDIR/system/work \
+    "$@"
+  /sbin/depmod -A -b $kernel_dir $_quiz_kver
+}
+
 case "$1" in
-  configure) do_configure "${@:2}" ;;
+  configure)
+    do_configure "${@:2}"
+    ;;
   make)
     if [[ $# -ge 2 && $2 == install ]] ; then
       do_make_install "${@:3}"
+    else
+      do_make "${@:2}"
     fi
-    do_make "${@:2}"
     ;;
-  *) usage ;;
+  *)
+    usage
+    ;;
 esac
 
 # vim: ft=bash
