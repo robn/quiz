@@ -110,7 +110,7 @@ fi
 
 if [[ -z $_quiz_arch_native ]] ; then
   trace "setting up for cross-compile: $_quiz_arch_kernel"
-  makeopts="$makeopts CROSS_COMPILE=$_quiz_arch_prefix ARCH=$_quiz_arch_kernel"
+  makeopts="$makeopts CROSS_COMPILE=${_quiz_arch_prefix}- ARCH=$_quiz_arch_kernel"
 fi
 
 declare -A kernel_sumfile

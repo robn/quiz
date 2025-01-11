@@ -154,13 +154,13 @@ function quiz_arch_vars () {
       _quiz_arch=x86_64
       _quiz_arch_kernel=x86
       _quiz_arch_qemu=x86_64
-      _quiz_arch_prefix=x86_64-linux-gnu-
+      _quiz_arch_prefix=x86_64-linux-gnu
       ;;
     ppc64)
       _quiz_arch=ppc64
       _quiz_arch_kernel=powerpc
       _quiz_arch_qemu=ppc64
-      _quiz_arch_prefix=powerpc64-linux-gnu-
+      _quiz_arch_prefix=powerpc64-linux-gnu
       ;;
     *)
       fail "no support for architecture: $arch"
