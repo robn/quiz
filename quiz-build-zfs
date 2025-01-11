@@ -68,6 +68,14 @@ quiz_arch_vars ${opt_arch:-$QUIZ_ARCH}
 quiz_kernel_best_available ${opt_kernel:-$QUIZ_KERNEL_VERSION}
 
 do_configure() {
+  local cross_opts=""
+  if [[ -z $_quiz_arch_native ]] ; then
+    cross_opts="
+      --host=$_quiz_arch_prefix
+      KERNEL_CROSS_COMPILE=${_quiz_arch_prefix}-
+      KERNEL_ARCH=$_quiz_arch_kernel
+    "
+  fi
   ./configure \
     --with-linux=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
     --with-linux-obj=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
@@ -75,7 +83,10 @@ do_configure() {
     --disable-sysvinit \
     --disable-systemd \
     --disable-pam \
-    'lt_cv_sys_lib_dlsearch_path_spec=/lib /usr/lib /lib/i686-linux-gnu /usr/lib/x86_64-linux-gnu' \
+    --without-python \
+    --disable-pyzfs \
+    $cross_opts \
+    "lt_cv_sys_lib_dlsearch_path_spec=/lib /usr/lib /usr/lib/$_quiz_arch_prefix" \
     "$@"
 }
 
