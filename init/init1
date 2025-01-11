@@ -4,26 +4,25 @@
 # second-stage init in the quiz work dir
 
 # bring the local dirs in
-mount -t 9p -o trans=virtio quiz-init /mnt/quiz-init \
+for dir in init user kernel system ; do
+  mount -t 9p -o trans=virtio quiz-$dir /mnt/quiz-$dir \
   -oversion=9p2000.L,posixacl,msize=512000,cache=loose
-mount -t 9p -o trans=virtio quiz-system /mnt/quiz-system \
-  -oversion=9p2000.L,posixacl,msize=512000,cache=loose
-mount -t 9p -o trans=virtio quiz-user /mnt/quiz-user \
-  -oversion=9p2000.L,posixacl,msize=512000,cache=loose
+done
 
 # build the root overlay. this is creating this layering:
 #
 #   tmpfs           /mnt/overlay/upper [rw]
-#   quiz user dir   /mnt/quiz-user     [ro]
-#   quiz system dir /mnt/quiz-system   [ro]
 #   quiz init dir   /mnt/quiz-init     [ro]
+#   quiz user dir   /mnt/quiz-user     [ro]
+#   quiz kernel dir /mnt/quiz-kernel   [ro]
+#   quiz system dir /mnt/quiz-system   [ro]
 #   root.ext2       /                  [ro]
 #
 # the overlay is then mounted at /mnt/newroot
 mount -t tmpfs tmpfs /mnt/overlay
 mkdir /mnt/overlay/upper /mnt/overlay/work
 mount --bind / /mnt/lower
-mount -t overlay overlay -o lowerdir=/mnt/quiz-init:/mnt/quiz-user:/mnt/quiz-system:/mnt/lower,upperdir=/mnt/overlay/upper,workdir=/mnt/overlay/work /mnt/newroot
+mount -t overlay overlay -o lowerdir=/mnt/quiz-init:/mnt/quiz-user:/mnt/quiz-kernel:/mnt/quiz-system:/mnt/lower,upperdir=/mnt/overlay/upper,workdir=/mnt/overlay/work /mnt/newroot
 
 # make /mnt/newroot the new /. after the pivot, the original root is on /mnt
 pivot_root /mnt/newroot /mnt/newroot/mnt
@@ -43,6 +42,7 @@ mount -t devpts none /dev/pts
 umount --lazy /mnt/mnt/lower
 umount --lazy /mnt/mnt/overlay
 umount --lazy /mnt/mnt/quiz-system
+umount --lazy /mnt/mnt/quiz-kernel
 umount --lazy /mnt/mnt/quiz-user
 umount --lazy /mnt/mnt/quiz-init
 umount --lazy /mnt

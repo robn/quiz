@@ -101,20 +101,22 @@ function quiz_kernel_best_available () {
     fail "no kernel version set. use -k or set QUIZ_KERNEL_VERSION"
   fi
 
-  _quiz_bzimage=""
+  local kernel_dir=$RUNDIR/system/kernel/$_quiz_arch_kernel
+
+  _quiz_kernel_image=""
 
   quiz_kernel_vars $kver
 
   if [[ $kver = $_quiz_kver ]] ; then
     # canonical kernel version specified, must use only that version
-    local bzimage=$RUNDIR/system/bzImage-$_quiz_kver
-    if [[ ! -e $bzimage ]] ; then
+    local image=$kernel_dir/vmlinux-$_quiz_kver
+    if [[ ! -e $image ]] ; then
       fail "kernel image not found: $_quiz_kver"
     fi
-    _quiz_bzimage=$bzimage
+    _quiz_kernel_image=$image
   else
     # partial version specified, choose from best available
-    local candidates="$(find $RUNDIR/system -maxdepth 1 -name "bzImage-$_quiz_ksrcver.*" | cut -f2- -d- | sort -V)"
+    local candidates="$(find $kernel_dir -maxdepth 1 -name "vmlinux-$_quiz_ksrcver.*" | cut -f2- -d- | sort -V)"
     local best=""
     for candidate in $candidates ; do
       quiz_kernel_vars $candidate
@@ -129,7 +131,7 @@ function quiz_kernel_best_available () {
       fail "matching kernel image not found: $kver"
     fi
     quiz_kernel_vars $best
-    _quiz_bzimage=$RUNDIR/system/bzImage-$_quiz_kver
+    _quiz_kernel_image=$kernel_dir/vmlinux-$_quiz_kver
   fi
 
   trace "using kernel: $_quiz_kver"

@@ -171,12 +171,28 @@ trace "starting microvm"
 #       -- robn, 2025-01-09
 #
 
-# this is hand rolled from my early tests. seems right but its a lot of mess
-qemu-system-x86_64 \
-	-M microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off,pcie=on \
-	-enable-kvm \
-		-cpu host -m 16G -smp 6 \
-  -kernel $_quiz_bzimage \
+qemu_bin=qemu-system-$_quiz_arch_qemu
+qemu_machine_opts=""
+qemu_cpu_opts=""
+case "$_quiz_arch_qemu" in
+  x86_64)
+    # XXX I think microvm only works for native CPUs, but I need to test more
+    qemu_machine_opts="-machine microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off,pcie=on"
+    qemu_cpu_opts="-cpu qemu64"
+    ;;
+  ppc64)
+    qemu_machine_opts="-machine ppce500"
+    qemu_cpu_opts="-cpu e6500"
+    ;;
+esac
+
+if [[ -n $_quiz_arch_native ]] ; then
+  qemu_cpu_opts="-cpu host -enable-kvm"
+fi
+
+$qemu_bin $qemu_machine_opts $qemu_cpu_opts \
+  -m 2G -smp 2 \
+  -kernel $_quiz_kernel_image \
     -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
   -chardev stdio,mux=on,signal=off,id=virtiocon0 \
@@ -184,11 +200,13 @@ qemu-system-x86_64 \
   -device virtio-serial-pci \
   -device virtconsole,chardev=virtiocon0 \
   -device virtio-balloon-pci \
-  -device pvpanic \
+  -device pvpanic-pci \
   -drive id=root,file=$RUNDIR/system/$_quiz_debian_release.$_quiz_debian_arch.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-pci,drive=root,serial=root \
   -fsdev local,id=quiz-init,path=$RUNDIR/system/init,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-init,mount_tag=quiz-init \
+  -fsdev local,id=quiz-kernel,path=$RUNDIR/system/kernel/$_quiz_arch_kernel,security_model=none,readonly=on \
+  -device virtio-9p-pci,fsdev=quiz-kernel,mount_tag=quiz-kernel \
   -fsdev local,id=quiz-system,path=$RUNDIR/system/work,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-system,mount_tag=quiz-system \
   -fsdev local,id=quiz-user,path=$RUNDIR/system/user,security_model=none,readonly=on \

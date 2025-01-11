@@ -75,7 +75,10 @@ mmdebstrap \
   --variant=minbase \
   --include=$quiz_extras,$zfs_extras,$zfstest_extras,$debug_extras \
     --customize-hook='install -m 755 init/init1 "$1"/sbin/init' \
-    --customize-hook='mkdir "$1"/mnt/quiz-init "$1"/mnt/quiz-system "$1"/mnt/quiz-user' \
+    --customize-hook='mkdir "$1"/mnt/quiz-init' \
+    --customize-hook='mkdir "$1"/mnt/quiz-user' \
+    --customize-hook='mkdir "$1"/mnt/quiz-kernel' \
+    --customize-hook='mkdir "$1"/mnt/quiz-system' \
     --customize-hook='mkdir "$1"/mnt/lower "$1"/mnt/overlay "$1"/mnt/newroot' \
   $_quiz_debian_release $RUNDIR/system/$image_basefile.new.ext2 "$_quiz_debian_mirror"
 mv -vf $RUNDIR/system/$image_basefile.new.ext2 $RUNDIR/system/$image_basefile.ext2

@@ -16,6 +16,7 @@ usage: quiz-prepare-kernel [opts]
 options:
   -k <kernel>     kernel to build
                     (can be used multiple times)
+  -a <arch>       architecture to build for
   -e/-d/-m <key>  set kernel config key to enable/disable/module (Y/N/M)
                     (can be used multiple times)
   -u              update standard config for this kernel minor version
@@ -23,7 +24,6 @@ options:
   -C              don't install kernel config before build
   -B              don't build kernel
   -K              build latest of all kernel series with available config
-  -W              update work dir only (with -B)
   -h              this help
 EOF
   exit 1
@@ -48,6 +48,7 @@ RUNDIR=$(realpath $(dirname $0))
 source $RUNDIR/quiz-config
 source $RUNDIR/quiz-lib
 
+opt_arch=""
 opt_kernel=""
 opt_no_config=""
 opt_no_build=""
@@ -55,12 +56,12 @@ opt_llvm=""
 opt_update_config=""
 opt_modify_config=""
 opt_all_kernels=""
-opt_update_work=""
 
 OPTIND=1
-while getopts "k:CBe:d:m:uLKWh" opt
+while getopts "a:k:CBe:d:m:uLKh" opt
 do
   case "$opt" in
+    'a') opt_arch=$OPTARG ;;
     'k') opt_kernel="$opt_kernel $OPTARG" ;;
     'C') opt_no_config=1 ;;
     'B') opt_no_build=1 ;;
@@ -70,18 +71,15 @@ do
     'u') opt_update_config=1 ;;
     'L') opt_llvm=1 ;;
     'K') opt_all_kernels=1 ;;
-    'W') opt_update_work=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
 done
 shift $(expr $OPTIND - 1)
 
-cd $RUNDIR
+quiz_arch_vars ${opt_arch:-$QUIZ_ARCH}
 
-if [[ -n $opt_update_work && -z $opt_no_build ]] ; then
-  fail "invalid build options: can't use -W without -B"
-fi
+cd $RUNDIR
 
 if [[ -n $opt_kernel && -n $opt_all_kernels ]] ; then
   fail "invalid kernel version options; can't use -k and -K together"
@@ -91,7 +89,7 @@ if [[ -z $opt_kernel && -z $opt_all_kernels ]] ; then
 fi
 
 if [[ -n $opt_all_kernels ]] ; then
-    opt_kernel=$(ls kernel/config-* | cut -d- -f2 | sort -V)
+    opt_kernel=$(ls kernel/$_quiz_arch_kernel/config-* | cut -d- -f2 | sort -V)
 fi
 
 makeopts=""
@@ -108,6 +106,11 @@ if [[ -n $opt_llvm ]] ; then
     best_clang="-$best_clang"
   fi
   makeopts="$makeopts LLVM=$best_clang"
+fi
+
+if [[ -z $_quiz_arch_native ]] ; then
+  trace "setting up for cross-compile: $_quiz_arch_kernel"
+  makeopts="$makeopts CROSS_COMPILE=$_quiz_arch_prefix ARCH=$_quiz_arch_kernel"
 fi
 
 declare -A kernel_sumfile
@@ -210,15 +213,17 @@ for kver in $kernel_versions ; do
   kcfg=config-$_quiz_kmajor.$_quiz_kminor
   if [[ -z $opt_no_config ]] ; then
     working_kcfg=$kcfg
-    if [[ ! -f kernel/$working_kcfg ]] ; then
+    if [[ ! -f kernel/$_quiz_arch_kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
-      working_kcfg=$(ls kernel/config-$_quiz_kmajor.* | cut -f2 -d/ | sort -V | tail -1)
+      working_kcfg=$(ls kernel/$_quiz_arch_kernel/config-$_quiz_kmajor.* | \
+        cut -f2 -d/ | sort -V | tail -1)
     fi
-    if [[ ! -f kernel/$working_kcfg ]] ; then
+    if [[ ! -f kernel/$_quiz_arch_kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
-      working_kcfg=$(ls kernel/config-* | cut -f2 -d/ | sort -V | tail -1)
+      working_kcfg=$(ls kernel/$_quiz_arch_kernel/config-* | \
+        cut -f2 -d/ | sort -V | tail -1)
     fi
-    if [[ ! -f kernel/$working_kcfg ]] ; then
+    if [[ ! -f kernel/$_quiz_arch_kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
       fatal "no usable config found!"
     fi
@@ -227,7 +232,8 @@ for kver in $kernel_versions ; do
     fi
 
     trace "installing config: $working_kcfg"
-    cp kernel/$working_kcfg build/kernel/linux-$_quiz_ksrcver/.config
+    cp kernel/$_quiz_arch_kernel/$working_kcfg \
+      build/kernel/linux-$_quiz_ksrcver/.config
   else
     trace "NOT installing config as requested"
   fi
@@ -245,7 +251,7 @@ for kver in $kernel_versions ; do
 
   if [[ -z $opt_no_build ]] ; then
     trace "building kernel: $_quiz_ksrcver"
-    make -j6 $makeopts
+    make -j6 $makeopts vmlinux modules
   else
     trace "NOT building kernel as requested"
   fi
@@ -254,41 +260,35 @@ for kver in $kernel_versions ; do
 
   if [[ -n $opt_update_config ]] ; then
     trace "updating standard config: $kcfg"
-    cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$kcfg
+    cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$_quiz_arch_kernel/$kcfg
   fi
+
+  kernel_dir=$RUNDIR/system/kernel/$_quiz_arch_kernel
 
   if [[ -z $opt_no_build ]] ; then
     trace "moving completed kernel into quiz system dir: $_quiz_kver"
 
-    mkdir -p system
-    cp build/kernel/linux-$_quiz_ksrcver/arch/x86/boot/bzImage system/bzImage-$_quiz_kver
-  fi
-
-  if [[ -z $opt_no_build || -n $opt_update_work ]] ; then
-    # generic work dir setup. this is sorta weird and vestigal, from a time
-    # where quiz didn't support multiple kernels. but it has a per-kernel part
-    # that needs to be remade on every kernel build, and it doesn't hurt
-
-    # bookworm introduced "merged /usr", so /lib is a symlink to /usr/lib. we
-    # have to set up for this the same way when we create the work dir,
-    # otherwise we end up asking overlay to combine a symlink and a dir for (at
-    # least) /lib, for which it will just take the dir as-is, and now nothing
-    # can find libc.
-    #
-    # XXX this would probably better if it looked inside the root image and
-    #     matched what's there, but this is just fine for what I need right now
-    #     and the whole bootstrapping processing is already creaking so
-    #       -- robn, 2023-07-07
+    # merged /usr setup
+    mkdir -p $kernel_dir
     for d in lib lib64 sbin bin ; do
-      mkdir -p system/work/usr/$d
-      ln -sf usr/$d system/work/$d
+      mkdir -p $kernel_dir/usr/$d
+      ln -sf usr/$d $kernel_dir/$d
     done
-    mkdir -p system/work
+
+    # copy kernel and system map into place. we do this behind instead of
+    # using `make install` so we can control what gets installed and with
+    # what names
+    cp -vf build/kernel/linux-$_quiz_ksrcver/vmlinux \
+      $kernel_dir/vmlinux-$_quiz_kver
+    cp -vf build/kernel/linux-$_quiz_ksrcver/System.map \
+      $kernel_dir/System.map-$_quiz_kver
 
     trace "install kernel module structure"
-    make -C build/kernel/linux-$_quiz_ksrcver install modules_install \
-      INSTALL_PATH=$RUNDIR/system/work INSTALL_MOD_PATH=$RUNDIR/system/work
-    /sbin/depmod -b $RUNDIR/system/work $_quiz_kver
+
+    mkdir -p $kernel_dir
+    make -C build/kernel/linux-$_quiz_ksrcver $makeopts modules_install \
+      INSTALL_PATH=$kernel_dir INSTALL_MOD_PATH=$kernel_dir
+    /sbin/depmod -b $kernel_dir $_quiz_kver
   fi
 
   trace "build finished: $_quiz_kver"
