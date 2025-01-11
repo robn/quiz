@@ -203,7 +203,7 @@ function quiz_debian_vars () {
     x86_64)
       _quiz_debian_arch=amd64
       _quiz_debian_release=bookworm
-      _quiz_debian_mirror=""
+      _quiz_debian_mirror="https://deb.debian.org/debian"
       ;;
     ppc64)
       _quiz_debian_arch=ppc64
