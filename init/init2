@@ -57,6 +57,9 @@ resize=$(sed -nu '/.*R/ s/[^0-9;]//g ; s/\([0-9]*\);\([0-9]*\)/stty rows \1 cols
 stty "$saveterm"
 eval "$resize"
 
+# get quiz envvars into future shells
+ln -sf /.quiz/env /etc/profile.d/quiz.sh
+
 # if any profiles need work, boot them up
 if [ -r /.quiz/init.profile ] ; then
   . /.quiz/init.profile

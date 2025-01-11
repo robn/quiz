@@ -156,6 +156,22 @@ EOF
 fi
 chmod +x $RUNDIR/system/init/.quiz/run
 
+# build environment file
+cat <<EOF > $RUNDIR/system/init/.quiz/env
+export QUIZ_ARCH=$_quiz_arch
+export QUIZ_KERNEL_VERSION=$_quiz_kver
+export QUIZ_PROFILES="$profiles"
+
+for p in \$QUIZ_PROFILES ; do
+  for d in /opt/\$p/bin /opt/\$p/sbin ; do
+    if [ -d \$d ] ; then
+      PATH="\$d:\$PATH"
+    fi
+  done
+done
+export PATH
+EOF
+
 trace "starting microvm"
 
 #
