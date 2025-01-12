@@ -238,7 +238,9 @@ for kver in $kernel_versions ; do
     trace "NOT installing config as requested"
   fi
 
-  pushd build/kernel/linux-$_quiz_ksrcver > /dev/null
+  ksrc=$RUNDIR/build/kernel/linux-$_quiz_ksrcver
+
+  pushd $ksrc > /dev/null
 
   if [[ -n $opt_modify_config ]] ; then
     trace "updating config from commandline switches"
@@ -260,35 +262,36 @@ for kver in $kernel_versions ; do
 
   if [[ -n $opt_update_config ]] ; then
     trace "updating standard config: $kcfg"
-    cp build/kernel/linux-$_quiz_ksrcver/.config kernel/$_quiz_arch_kernel/$kcfg
+    cp $ksrc/.config kernel/$_quiz_arch_kernel/$kcfg
   fi
 
-  kernel_dir=$RUNDIR/system/kernel/$_quiz_arch_kernel
-
   if [[ -z $opt_no_build ]] ; then
-    trace "moving completed kernel into quiz system dir: $_quiz_kver"
+    trace "installing completed kernel: $_quiz_kver"
+
+    kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
+    mkdir -p $kdest
 
     # merged /usr setup
-    mkdir -p $kernel_dir
-    for d in lib lib64 sbin bin ; do
-      mkdir -p $kernel_dir/usr/$d
-      ln -sf usr/$d $kernel_dir/$d
-    done
+    mkdir -p $kdest/usr/lib
+    ln -sf usr/lib $kdest/lib
 
-    # copy kernel and system map into place. we do this behind instead of
-    # using `make install` so we can control what gets installed and with
-    # what names
-    cp -vf build/kernel/linux-$_quiz_ksrcver/vmlinux \
-      $kernel_dir/vmlinux-$_quiz_kver
-    cp -vf build/kernel/linux-$_quiz_ksrcver/System.map \
-      $kernel_dir/System.map-$_quiz_kver
+    # install everything we need. the kernel's own install stuff doesn't quite
+    # do everything the way we want, so we do a few things ourselves
 
-    trace "install kernel module structure"
+    # kernel and system map
+    cp -vf $ksrc/vmlinux $kdest/vmlinux-$_quiz_kver
+    cp -vf $ksrc/System.map $kdest/System.map-$_quiz_kver
 
-    mkdir -p $kernel_dir
-    make -C build/kernel/linux-$_quiz_ksrcver $makeopts modules_install \
-      INSTALL_PATH=$kernel_dir INSTALL_MOD_PATH=$kernel_dir
-    /sbin/depmod -b $kernel_dir $_quiz_kver
+    # modules tree
+    make -C $ksrc $makeopts modules_install INSTALL_MOD_PATH=$kdest
+    /sbin/depmod -b $kdest $_quiz_kver
+
+    # and kbuild, for external module build
+    pushd $ksrc > /dev/null
+    env srctree=$PWD SRCARCH=$_quiz_arch_kernel KCONFIG_CONFIG=.config \
+      scripts/package/install-extmod-build $kdest/kbuild/$_quiz_kver
+    popd > /dev/null
+
   fi
 
   trace "build finished: $_quiz_kver"

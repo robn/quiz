@@ -77,8 +77,7 @@ do_configure() {
     "
   fi
   ./configure \
-    --with-linux=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
-    --with-linux-obj=$RUNDIR/build/kernel/linux-$_quiz_ksrcver \
+    --with-linux=$RUNDIR/system/kernel/$_quiz_arch_kernel/kbuild/$_quiz_ksrcver \
     --prefix=/opt/zfs \
     --disable-sysvinit \
     --disable-systemd \
@@ -95,12 +94,12 @@ do_make() {
 }
 
 do_make_install() {
-  kernel_dir=$RUNDIR/system/kernel/$_quiz_arch_kernel
+  kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
   make install \
-    INSTALL_PATH=$kernel_dir INSTALL_MOD_PATH=$kernel_dir \
+    INSTALL_MOD_PATH=$kdest \
     DESTDIR=$RUNDIR/system/work \
     "$@"
-  /sbin/depmod -A -b $kernel_dir $_quiz_kver
+  /sbin/depmod -A -b $kdest $_quiz_kver
 }
 
 case "$1" in
