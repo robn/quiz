@@ -278,6 +278,8 @@ for kver in $kernel_versions ; do
     # install everything we need. the kernel's own install stuff doesn't quite
     # do everything the way we want, so we do a few things ourselves
 
+    # XXX delete the old stuff first? -- robn, 2025-01-13
+
     # kernel and system map
     cp -vf $ksrc/vmlinux $kdest/vmlinux-$_quiz_kver
     cp -vf $ksrc/System.map $kdest/System.map-$_quiz_kver
@@ -286,11 +288,20 @@ for kver in $kernel_versions ; do
     make -C $ksrc $makeopts modules_install INSTALL_MOD_PATH=$kdest
     /sbin/depmod -b $kdest $_quiz_kver
 
-    # and kbuild, for external module build
-    pushd $ksrc > /dev/null
-    env srctree=$PWD SRCARCH=$_quiz_arch_kernel KCONFIG_CONFIG=.config \
-      scripts/package/install-extmod-build $kdest/kbuild/$_quiz_kver
-    popd > /dev/null
+    # extern module build, so we're not dependent on kernel source to rebuild
+    # this is roughly what you find symlinked from /lib/modules/XXX/build
+    # on stock Linux systems. other architectures may require more/different
+    # things, refer to builddeb/buildrpm/install-extmod-build in the kernel
+    # source tree for details
+    mkdir -p $kdest/kbuild/$_quiz_kver
+    (
+      cd $ksrc
+      archdir=arch/$_quiz_arch_kernel
+      find Makefile include scripts tools/objtool/objtool -type f -o -type l
+      find $archdir -maxdepth 1 -name 'Makefile*'
+      find $archdir -name include -o -name scripts -type d
+      find $archdir/include Module.symvers include scripts -type f
+    ) | tar -cf - -C $ksrc -T - | tar -xf - -C $kdest/kbuild/$_quiz_kver
 
   fi
 
