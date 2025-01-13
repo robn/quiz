@@ -211,6 +211,13 @@ for kver in $kernel_versions ; do
     popd > /dev/null
   fi
 
+  if [[ -f $ksrc/.config ]] ; then
+    if ! grep -q -m1 "^# Linux/$_quiz_arch_kernel" $ksrc/.config ; then
+      trace "existing source dir was for a different architecture, cleaning it"
+      make -s -C $ksrc distclean $makeopts
+    fi
+  fi
+
   kcfg=config-$_quiz_kmajor.$_quiz_kminor
   if [[ -z $opt_no_config ]] ; then
     working_kcfg=$kcfg
