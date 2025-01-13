@@ -23,7 +23,9 @@ options:
   -L              build with LLVM/Clang
   -C              don't install kernel config before build
   -B              don't build kernel
-  -K              build latest of all kernel series with available config
+  -K              rebuild all installed kernels
+                    (equivalent to -k <v1> -k <v2> ...)
+  -U              upgrade kernels (build latest for minor series)
   -h              this help
 EOF
   exit 1
@@ -56,9 +58,10 @@ opt_llvm=""
 opt_update_config=""
 opt_modify_config=""
 opt_all_kernels=""
+opt_upgrade=""
 
 OPTIND=1
-while getopts "a:k:CBe:d:m:uLKh" opt
+while getopts "a:k:CBe:d:m:uLKUh" opt
 do
   case "$opt" in
     'a') opt_arch=$OPTARG ;;
@@ -71,6 +74,7 @@ do
     'u') opt_update_config=1 ;;
     'L') opt_llvm=1 ;;
     'K') opt_all_kernels=1 ;;
+    'U') opt_upgrade=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -89,7 +93,10 @@ if [[ -z $opt_kernel && -z $opt_all_kernels ]] ; then
 fi
 
 if [[ -n $opt_all_kernels ]] ; then
-    opt_kernel=$(ls kernel/$_quiz_arch_kernel/config-* | cut -d- -f2 | sort -V)
+    opt_kernel=$(ls system/kernel/$_quiz_arch_kernel/kernel-* | cut -d- -f2 | sort -V)
+    if [[ -z $opt_kernel ]] ; then
+      fail "no kernels found in system/kernel/$_quiz_arch_kernel"
+    fi
 fi
 
 makeopts=""
@@ -118,7 +125,7 @@ declare -A kernel_sumfile
 kernel_versions=""
 for kver in $opt_kernel ; do
   _quiz_kernel_vars $kver
-  if [[ $_quiz_kmajor && $_quiz_kminor && -z $_quiz_kpatch ]] ; then
+  if [[ $_quiz_kmajor && $_quiz_kminor && ( -z $_quiz_kpatch || -n $opt_upgrade ) ]] ; then
     if [[ -z ${kernel_sumfile[$_quiz_kmajor]:-} ]] ; then
       sumfile=build/kernel/sha256sums.$_quiz_kmajor
       trace "fetching list of available kernels for v$_quiz_kmajor.x"
@@ -130,12 +137,16 @@ for kver in $opt_kernel ; do
       kernel_sumfile[$_quiz_kmajor]=$sumfile
     fi
     latest=$(cat ${kernel_sumfile[$_quiz_kmajor]} | \
-      sed -Ene "/linux-.+\.tar.xz/ { s/.*linux-($kver\.[0-9]+)\.tar\.xz/\1/ p }" | tail -1)
+      sed -Ene "/linux-.+\.tar.xz/ { s/.*linux-($_quiz_kmajor\.$_quiz_kminor\.[0-9]+)\.tar\.xz/\1/ p }" | tail -1)
     if [[ -z $latest ]] ; then
-      trace "no available kernel for $kver"
+      trace "no latest kernel matching $_quiz_kmajor.$_quiz_kminor"
       kver=""
     else
-      trace "will build $latest for $kver"
+      if [[ -n $opt_upgrade ]] ; then
+        trace "will upgrade $kver to $latest"
+      else
+        trace "will build $latest for $kver"
+      fi
       kver=$latest
     fi
   fi
