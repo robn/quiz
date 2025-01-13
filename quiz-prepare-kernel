@@ -252,20 +252,12 @@ for kver in $kernel_versions ; do
   make -s -j6 olddefconfig $makeopts
 
   if [[ -z $opt_no_build ]] ; then
-    trace "building kernel: $_quiz_ksrcver"
-    make -j6 $makeopts vmlinux modules
-  else
-    trace "NOT building kernel as requested"
-  fi
+    kimagepath=$(make -s image_name $makeopts)
+    kimage=$(basename $kimagepath)
 
-  popd > /dev/null
+    trace "building kernel: $_quiz_ksrcver ($kimage)"
 
-  if [[ -n $opt_update_config ]] ; then
-    trace "updating standard config: $kcfg"
-    cp $ksrc/.config kernel/$_quiz_arch_kernel/$kcfg
-  fi
-
-  if [[ -z $opt_no_build ]] ; then
+    make -j6 $makeopts $kimage modules
     trace "installing completed kernel: $_quiz_kver"
 
     kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
@@ -281,7 +273,7 @@ for kver in $kernel_versions ; do
     # XXX delete the old stuff first? -- robn, 2025-01-13
 
     # kernel and system map
-    cp -vf $ksrc/vmlinux $kdest/vmlinux-$_quiz_kver
+    cp -vf $ksrc/$kimagepath $kdest/kernel-$_quiz_kver
     cp -vf $ksrc/System.map $kdest/System.map-$_quiz_kver
 
     # modules tree
@@ -303,6 +295,15 @@ for kver in $kernel_versions ; do
       find $archdir/include Module.symvers include scripts -type f
     ) | tar -cf - -C $ksrc -T - | tar -xf - -C $kdest/kbuild/$_quiz_kver
 
+  else
+    trace "NOT building kernel as requested"
+  fi
+
+  popd > /dev/null
+
+  if [[ -n $opt_update_config ]] ; then
+    trace "updating standard config: $kcfg"
+    cp $ksrc/.config kernel/$_quiz_arch_kernel/$kcfg
   fi
 
   trace "build finished: $_quiz_kver"
