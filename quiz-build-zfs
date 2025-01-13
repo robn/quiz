@@ -94,6 +94,12 @@ do_make() {
 }
 
 do_make_install() {
+  # merged /usr setup
+  for d in lib lib32 lib64 bin sbin ; do
+    mkdir -p $RUNDIR/system/work/usr/$d
+    ln -sf usr/$d $RUNDIR/system/work/$d
+  done
+
   kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
   make install \
     INSTALL_MOD_PATH=$kdest \
