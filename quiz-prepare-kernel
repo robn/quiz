@@ -216,16 +216,16 @@ for kver in $kernel_versions ; do
     if [[ ! -f kernel/$_quiz_arch_kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
       working_kcfg=$(ls kernel/$_quiz_arch_kernel/config-$_quiz_kmajor.* | \
-        cut -f2 -d/ | sort -V | tail -1)
+        cut -f3 -d/ | sort -V | tail -1)
     fi
     if [[ ! -f kernel/$_quiz_arch_kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
       working_kcfg=$(ls kernel/$_quiz_arch_kernel/config-* | \
-        cut -f2 -d/ | sort -V | tail -1)
+        cut -f3 -d/ | sort -V | tail -1)
     fi
     if [[ ! -f kernel/$_quiz_arch_kernel/$working_kcfg ]] ; then
       trace "config not found: $working_kcfg"
-      fatal "no usable config found!"
+      fail "no usable config found!"
     fi
     if [[ $kcfg != $working_kcfg ]] ; then
       trace "specific config not found, using fallback: $working_kcfg"
