@@ -26,6 +26,7 @@ options:
   -K              rebuild all installed kernels
                     (equivalent to -k <v1> -k <v2> ...)
   -U              upgrade kernels (build latest for minor series)
+  -X              with -U, remove old kernels in same minor series
   -h              this help
 EOF
   exit 1
@@ -59,9 +60,10 @@ opt_update_config=""
 opt_modify_config=""
 opt_all_kernels=""
 opt_upgrade=""
+opt_upgrade_cleanup=""
 
 OPTIND=1
-while getopts "a:k:CBe:d:m:uLKUh" opt
+while getopts "a:k:CBe:d:m:uLKUXh" opt
 do
   case "$opt" in
     'a') opt_arch=$OPTARG ;;
@@ -75,6 +77,7 @@ do
     'L') opt_llvm=1 ;;
     'K') opt_all_kernels=1 ;;
     'U') opt_upgrade=1 ;;
+    'X') opt_upgrade_cleanup=1 ;;
     'h') usage ;;
     *) exit 1 ;;
   esac
@@ -90,6 +93,9 @@ if [[ -n $opt_kernel && -n $opt_all_kernels ]] ; then
 fi
 if [[ -z $opt_kernel && -z $opt_all_kernels ]] ; then
   fail "no kernel version supplied; one of -k or -K required"
+fi
+if [[ -z $opt_upgrade && -n $opt_upgrade_cleanup ]] ; then
+  fail "invalid upgrade options; can't use -X without -U"
 fi
 
 if [[ -n $opt_all_kernels ]] ; then
@@ -141,12 +147,16 @@ for kver in $opt_kernel ; do
     if [[ -z $latest ]] ; then
       trace "no latest kernel matching $_quiz_kmajor.$_quiz_kminor"
       kver=""
-    else
-      if [[ -n $opt_upgrade ]] ; then
-        trace "will upgrade $kver to $latest"
+    elif [[ -n $opt_upgrade ]] ; then
+      if [[ $latest == $kver ]] ; then
+        trace "$kver already latest, not rebuilding"
+        kver=""
       else
-        trace "will build $latest for $kver"
+        trace "will upgrade $kver to $latest"
+        kver=$latest
       fi
+    else
+      trace "will build $latest for $kver"
       kver=$latest
     fi
   fi
@@ -157,6 +167,8 @@ done
 
 kernel_versions=$(echo $kernel_versions | xargs -n1 | sort -V | uniq | xargs)
 trace "will build kernel versions: $kernel_versions"
+
+kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
 
 for kver in $kernel_versions ; do
   quiz_kernel_vars $kver
@@ -277,7 +289,6 @@ for kver in $kernel_versions ; do
     make -j6 $makeopts $kimage modules
     trace "installing completed kernel: $_quiz_kver"
 
-    kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
     mkdir -p $kdest
 
     # merged /usr setup
@@ -324,6 +335,14 @@ for kver in $kernel_versions ; do
   fi
 
   trace "build finished: $_quiz_kver"
+
+  if [[ -n $opt_upgrade_cleanup ]] ; then
+    trace "removing old kernels in minor series: $_quiz_kmajor.$_quiz_kminor"
+    find $kdest \
+      -name "*$_quiz_kmajor.$_quiz_kminor.*" -a \
+      ! -name "*$_quiz_kver" \
+    | xargs -r rm -r 
+  fi
 done
 
 # vim: ft=bash
