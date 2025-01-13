@@ -174,16 +174,17 @@ for kver in $kernel_versions ; do
 
   trace "preparing build: $_quiz_kver ($_quiz_ktype)"
 
-  mkdir -p build
-  if [[ -d build/kernel/linux-$_quiz_ksrcver ]] ; then
-    trace "using existing source dir: build/kernel/linux-$_quiz_ksrcver"
+  mkdir -p build/kernel
+  ksrc=$RUNDIR/build/kernel/linux-$_quiz_ksrcver
+
+  if [[ -d $ksrc ]] ; then
+    trace "using existing source dir: $ksrc"
     if [[ $ksrctype == 'git' ]] ; then
-      trace "cleaning up git dir: build/kernel/linux-$_quiz_ksrcver"
-      git -C build/kernel/linux-$_quiz_ksrcver clean -fdx
+      trace "cleaning up git dir: $ksrc"
+      git -C $ksrc clean -fdx
     fi
   else
-    trace "setting up for build in: build/kernel/linux-$_quiz_ksrcver"
-    mkdir -p build/kernel
+    trace "setting up for build in: $ksrc"
     pushd build/kernel > /dev/null
     case $ksrctype in
     tar)
@@ -237,8 +238,6 @@ for kver in $kernel_versions ; do
   else
     trace "NOT installing config as requested"
   fi
-
-  ksrc=$RUNDIR/build/kernel/linux-$_quiz_ksrcver
 
   pushd $ksrc > /dev/null
 
