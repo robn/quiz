@@ -162,14 +162,15 @@ export QUIZ_ARCH=$_quiz_arch
 export QUIZ_KERNEL_VERSION=$_quiz_kver
 export QUIZ_PROFILES="$profiles"
 
-for p in \$QUIZ_PROFILES ; do
-  for d in /opt/\$p/bin /opt/\$p/sbin ; do
-    if [ -d \$d ] ; then
-      PATH="\$d:\$PATH"
-    fi
-  done
-done
-export PATH
+#for p in \$QUIZ_PROFILES ; do
+#  for d in /opt/\$p/bin /opt/\$p/sbin ; do
+#    if [ -d \$d ] ; then
+#      PATH="\$d:\$PATH"
+#    fi
+#  done
+#done
+#export PATH
+export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
 EOF
 
 trace "starting microvm"

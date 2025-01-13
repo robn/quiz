@@ -76,14 +76,21 @@ do_configure() {
       KERNEL_ARCH=$_quiz_arch_kernel
     "
   fi
+
+  # XXX bunch of this needs to go into configure proper, disabling contrib
+  #     and whatnot. installing to /opt/zfs would be preferable, but
+  #     zts-tests.sh is hardcoded to /usr for now -- robn, 2025-01-13
   ./configure \
     --with-linux=$RUNDIR/system/kernel/$_quiz_arch_kernel/kbuild/$_quiz_ksrcver \
-    --prefix=/opt/zfs \
+    --prefix=/usr/local \
     --disable-sysvinit \
     --disable-systemd \
     --disable-pam \
     --without-python \
     --disable-pyzfs \
+    --with-mounthelperdir=/usr/local/sbin \
+    --with-dracutdir=/usr/local/lib/dracut \
+    --with-udevdir=/usr/local/lib/udev \
     $cross_opts \
     "lt_cv_sys_lib_dlsearch_path_spec=/lib /usr/lib /usr/lib/$_quiz_arch_prefix" \
     "$@"
