@@ -170,7 +170,7 @@ export QUIZ_PROFILES="$profiles"
 #  done
 #done
 #export PATH
-export PATH="$PATH:/usr/local/sbin:/usr/sbin:/sbin"
+export PATH="\$PATH:/usr/local/sbin:/usr/sbin:/sbin"
 EOF
 
 trace "starting microvm"
