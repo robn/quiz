@@ -86,7 +86,6 @@ do_configure() {
     --disable-sysvinit \
     --disable-systemd \
     --disable-pam \
-    --without-python \
     --disable-pyzfs \
     --with-mounthelperdir=/usr/local/sbin \
     --with-dracutdir=/usr/local/lib/dracut \
