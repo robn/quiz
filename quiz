@@ -207,8 +207,11 @@ if [[ -n $_quiz_arch_native ]] ; then
   qemu_cpu_opts="-cpu host -enable-kvm"
 fi
 
+qemu_mem=${QUIZ_MEM:-2G}
+qemu_cpus=${QUIZ_CPUS:-2}
+
 $qemu_bin $qemu_machine_opts $qemu_cpu_opts \
-  -m 2G -smp 2 \
+  -m $qemu_mem -smp $qemu_cpus \
   -kernel $_quiz_kernel_image \
     -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \

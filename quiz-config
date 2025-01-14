@@ -16,6 +16,10 @@ QUIZ_ARCH=$(uname -m)
 # default profile set (-p will override)
 QUIZ_PROFILE=""
 
+# memory and CPU count
+QUIZ_MEM=2G
+QUIZ_CPUS=2
+
 # extra options to be passed to the kernel or qemu
 QUIZ_KERNEL_OPTS=""
 QUIZ_QEMU_OPTS=""
