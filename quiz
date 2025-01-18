@@ -49,9 +49,9 @@ source $RUNDIR/quiz-lib
 
 opt_arch=""
 opt_kernel=""
-opt_profile="$QUIZ_PROFILE"
+opt_profile=""
 opt_shell=""
-opt_rc="${QUIZ_RC:-auto}"
+opt_rc=""
 
 OPTIND=1
 while getopts "a:k:p:Sr:h" opt
@@ -78,8 +78,8 @@ mkdir -p $RUNDIR/system/init/.quiz
 install -m 755 init/init2 $RUNDIR/system/init/.quiz/init2
 
 # rc selection
-rc=$opt_rc
-if [[ $opt_rc = "auto" ]] ; then
+rc=${opt_rc:-$QUIZ_RC}
+if [[ -z $opt_rc || $opt_rc = 'auto' ]] ; then
   rc=raw
   if [[ -t 1 ]] ; then
     rc=tmux
@@ -102,7 +102,7 @@ find profile/*/etc -type f | cut -d/ -f3- | \
 
 # get profiles set up. source the profile setup here, and build a profile init
 # to be run right before we exec into the real program
-profiles=$(echo $opt_profile | sed 's/,/ /g' | xargs -n1 | sort | xargs)
+profiles=$(echo ${opt_profile:-$QUIZ_PROFILE} | sed 's/,/ /g' | xargs -n1 | sort | xargs)
 if [[ $profiles ]] ; then
   for v in ${!QUIZ_@} ; do
     echo "$v=${!v@Q}" >> $RUNDIR/system/init/.quiz/init.profile

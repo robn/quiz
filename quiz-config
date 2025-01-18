@@ -7,13 +7,13 @@
 # default config for 'quiz', including generated config
 # don't change this, override in quiz.cfg
 
-# kernel version to use
-QUIZ_KERNEL_VERSION=6.1
-
-# local machine architecture
+# local machine architecture (-a will override)
 QUIZ_ARCH=$(uname -m)
 
-# default run control
+# kernel version to use (-k will override)
+QUIZ_KERNEL_VERSION=6.1
+
+# default run control (-r will override)
 QUIZ_RC=auto
 
 # default profile set (-p will override)
