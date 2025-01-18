@@ -1,4 +1,11 @@
 #!/bin/sh
+# SPDX-License-Identifier: MPL-2.0
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2023-2025, Rob Norris <robn@despairlabs.com>
 
 # first-stage init; getting the filesystems up, then we bounce into the
 # second-stage init in the quiz work dir
@@ -49,3 +56,5 @@ umount --lazy /mnt
 
 # bounce into the second stage
 exec /.quiz/init2
+
+# vim: ft=sh
