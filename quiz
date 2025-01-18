@@ -10,7 +10,7 @@ set -uo pipefail
 
 usage() {
   cat <<EOF
-spin up a qemu microvm with ZFS ready to go
+spin up a VM, run a program in it, tear it down again
 usage: quiz [opts] [program [args...]]
 
 options:
