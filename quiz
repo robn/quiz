@@ -89,6 +89,9 @@ if [[ ! -d $RUNDIR/rc/$rc ]] ; then
   fail "unknown rc: $rc"
 fi
 trace "using rc: $rc"
+if [[ -r $RUNDIR/rc/$rc/vars ]] ; then
+    source $RUNDIR/rc/$rc/vars
+fi
 rsync -a $RUNDIR/rc/$rc/ $RUNDIR/system/init/.quiz/rc
 
 # XXX ensure user dir exists
@@ -215,7 +218,7 @@ $qemu_bin $qemu_machine_opts $qemu_cpu_opts \
   -kernel $_quiz_kernel_image \
     -append "console=hvc0 root=/dev/vda ro reboot=t $QUIZ_KERNEL_OPTS" \
   -nodefaults -no-user-config -nographic \
-  -chardev stdio,mux=on,signal=off,id=virtiocon0 \
+  -chardev stdio,mux=on,signal=${_quiz_rc_signals:-off},id=virtiocon0 \
   -mon chardev=virtiocon0,mode=readline \
   -device virtio-serial-pci \
   -device virtconsole,chardev=virtiocon0 \
