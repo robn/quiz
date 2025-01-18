@@ -13,6 +13,9 @@ QUIZ_KERNEL_VERSION=6.1
 # local machine architecture
 QUIZ_ARCH=$(uname -m)
 
+# default run control
+QUIZ_RC=auto
+
 # default profile set (-p will override)
 QUIZ_PROFILE=""
 

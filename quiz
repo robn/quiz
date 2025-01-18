@@ -51,7 +51,7 @@ opt_arch=""
 opt_kernel=""
 opt_profile="$QUIZ_PROFILE"
 opt_shell=""
-opt_rc="auto"
+opt_rc="${QUIZ_RC:-auto}"
 
 OPTIND=1
 while getopts "a:k:p:Sr:h" opt
