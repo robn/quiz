@@ -80,7 +80,7 @@ install -m 755 init/init2 $RUNDIR/system/init/.quiz/init2
 
 # rc selection
 rc=${opt_rc:-$QUIZ_RC}
-if [[ -z $opt_rc || $opt_rc = 'auto' ]] ; then
+if [[ -z $rc || $rc = 'auto' ]] ; then
   rc=raw
   if [[ -t 1 ]] ; then
     rc=tmux
