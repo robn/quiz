@@ -18,7 +18,7 @@ done
 
 # build the root overlay. this is creating this layering:
 #
-#   tmpfs           /mnt/overlay/upper [rw]
+#   tmpfs           /mnt/top/upper     [rw]
 #   quiz init dir   /mnt/quiz-init     [ro]
 #   quiz user dir   /mnt/quiz-user     [ro]
 #   quiz kernel dir /mnt/quiz-kernel   [ro]
@@ -26,10 +26,10 @@ done
 #   root.ext2       /                  [ro]
 #
 # the overlay is then mounted at /mnt/newroot
-mount -t tmpfs tmpfs /mnt/overlay
-mkdir /mnt/overlay/upper /mnt/overlay/work
+mount -t tmpfs tmpfs /mnt/top
+mkdir /mnt/top/upper /mnt/top/work
 mount --bind / /mnt/lower
-mount -t overlay overlay -o lowerdir=/mnt/quiz-init:/mnt/quiz-user:/mnt/quiz-kernel:/mnt/quiz-system:/mnt/lower,upperdir=/mnt/overlay/upper,workdir=/mnt/overlay/work /mnt/newroot
+mount -t overlay overlay -o lowerdir=/mnt/quiz-init:/mnt/quiz-user:/mnt/quiz-kernel:/mnt/quiz-system:/mnt/lower,upperdir=/mnt/top/upper,workdir=/mnt/top/work /mnt/newroot
 
 # make /mnt/newroot the new /. after the pivot, the original root is on /mnt
 pivot_root /mnt/newroot /mnt/newroot/mnt
@@ -47,7 +47,7 @@ mount -t devpts none /dev/pts
 # racy and sometimes leaves one or more still mounted; it hardly matters, we're
 # just trying to tidy up
 umount --lazy /mnt/mnt/lower
-umount --lazy /mnt/mnt/overlay
+umount --lazy /mnt/mnt/top
 umount --lazy /mnt/mnt/quiz-system
 umount --lazy /mnt/mnt/quiz-kernel
 umount --lazy /mnt/mnt/quiz-user
