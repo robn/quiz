@@ -158,6 +158,11 @@ echo "quiz: starting shell" >> /dev/kmsg
 /bin/bash
 EOF
 fi
+cat <<EOF >> $RUNDIR/system/init/.quiz/run
+# kill kernel output on successful completion, to suppress the panic shutdown
+# crash
+echo 0 0 0 0 > /proc/sys/kernel/printk
+EOF
 chmod +x $RUNDIR/system/init/.quiz/run
 
 # build environment file
