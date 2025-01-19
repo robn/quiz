@@ -20,7 +20,7 @@
 # (installed) and "source version" (source), and also vars for all the pieces
 #
 
-# separate function for the pre-cooked parse; used by quiz-prepare-kernel
+# separate function for the pre-cooked parse; used by quiz-kernel
 # to request "latest in series"
 function _quiz_kernel_vars () {
   local kver=$1

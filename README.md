@@ -46,7 +46,7 @@ On a Debian 12 (bookworm) system you’ll need at least:
 
 ### Build the kernel
 
-Run `quiz-prepare-kernel`. This will grab kernel source, compile it with a very minimal config to support only what’s needed for the microvm, and install it into the system dir.
+Run `quiz-kernel`. This will grab kernel source, compile it with a very minimal config to support only what’s needed for the microvm, and install it into the system dir.
 
 It will also set up the "work" dir, which is where kernel modules build artifacts and whatever else gets "installed" into the VM.
 

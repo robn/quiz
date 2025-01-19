@@ -11,8 +11,8 @@ set -uo pipefail
 
 usage() {
   cat <<EOF
-compile a kernel optimised for the quiz microvm
-usage: quiz-prepare-kernel [opts]
+compile and manage quiz custom kernels
+usage: quiz-kernel [opts]
 
 options:
   -k <kernel>     kernel to build
@@ -35,7 +35,7 @@ EOF
 
 trace() {
   local STAMP=$(date +%Y%m%d-%H:%M:%S)
-  echo "[quiz-prepare-kernel] $STAMP $@" >&2
+  echo "[quiz-kernel] $STAMP $@" >&2
 }
 
 fail() {
