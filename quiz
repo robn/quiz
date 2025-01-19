@@ -94,6 +94,7 @@ if [[ -r $RUNDIR/rc/$rc/vars ]] ; then
     source $RUNDIR/rc/$rc/vars
 fi
 rsync -a $RUNDIR/rc/$rc/ $RUNDIR/system/init/.quiz/rc
+cp $RUNDIR/rc/bashrc $RUNDIR/system/init/.quiz/rc
 
 # XXX ensure user dir exists
 mkdir -p $RUNDIR/system/user
@@ -149,13 +150,13 @@ EOF
   if [[ $opt_shell ]] ; then
     cat <<EOF >> $RUNDIR/system/init/.quiz/run
 echo "quiz: user program done, dropping to shell" >> /dev/kmsg
-exec /bin/bash
+/bin/bash --rcfile /.quiz/rc/bashrc
 EOF
   fi
 else
   cat <<EOF > $RUNDIR/system/init/.quiz/run
 echo "quiz: starting shell" >> /dev/kmsg
-/bin/bash
+/bin/bash --rcfile /.quiz/rc/bashrc
 EOF
 fi
 cat <<EOF >> $RUNDIR/system/init/.quiz/run
