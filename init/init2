@@ -73,6 +73,6 @@ if [ -r /.quiz/init.profile ] ; then
 fi
 
 # start a "real" init and hand control to rc
-exec tini -vwsg -- /bin/sh -l -- /.quiz/rc/run
+exec tini -sg -- /bin/sh -l -- /.quiz/rc/run
 
 # vim: ft=sh
