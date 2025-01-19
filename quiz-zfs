@@ -12,7 +12,7 @@ set -uo pipefail
 usage() {
   cat <<EOF
 build OpenZFS with options to work well with quiz
-usage: quiz-build-zfs [opts] <configure|make> [program args...]
+usage: quiz-zfs [opts] <configure|make> [program args...]
 
 options:
   -k <kernel>     kernel to use for this run
@@ -24,7 +24,7 @@ EOF
 
 trace() {
   local STAMP=$(date +%Y%m%d-%H:%M:%S)
-  echo "[quiz-build-zfs] $STAMP $@" >&2
+  echo "[quiz-zfs] $STAMP $@" >&2
 }
 
 fail() {

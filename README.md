@@ -56,15 +56,15 @@ Run `quiz-prepare-root`. This will generate a barely-there Debian root image.
 
 ### Build OpenZFS
 
-The configure and install commands are quite involved to get it to properly target the work dir. The `quiz-build-zfs` wrapper is there to help with this.
+The configure and install commands are quite involved to get it to properly target the work dir. The `quiz-zfs` wrapper is there to help with this.
 
 From an OpenZFS checkout:
 
 ```
 $ ./autogen.sh
-$ ~/quiz/quiz-build-zfs configure --enable-debug --enable-debuginfo # your configure options here
-$ make -j5
-$ ~/quiz/quiz-build-zfs make install
+$ ~/quiz/quiz-zfs configure --enable-debug --enable-debuginfo # your configure options here
+$ make -j6
+$ ~/quiz/quiz-zfs make install
 ```
 
 ### Run it
