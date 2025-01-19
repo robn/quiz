@@ -342,7 +342,7 @@ for kver in $kernel_versions ; do
     find $kdest \
       -name "*$_quiz_kmajor.$_quiz_kminor.*" -a \
       ! -name "*$_quiz_kver" \
-    | xargs -r rm -r 
+    | xargs -r rm -r
   fi
 done
 
