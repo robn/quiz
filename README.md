@@ -52,7 +52,7 @@ It will also set up the "work" dir, which is where kernel modules build artifact
 
 ### Build the root image
 
-Run `quiz-prepare-root`. This will generate a barely-there Debian root image.
+Run `quiz-root`. This will generate a barely-there Debian root image.
 
 ### Build OpenZFS
 

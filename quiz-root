@@ -12,16 +12,16 @@ set -uo pipefail
 usage() {
   cat <<EOF
 create a minimal root filesystem for the quiz microvm
-usage: quiz-prepare-root
+usage: quiz-root
   -a <arch>
-        architecture to prepare root for
+        architecture to create root for
 EOF
   exit 1
 }
 
 trace() {
   local STAMP=$(date +%Y%m%d-%H:%M:%S)
-  echo "[quiz-prepare-root] $STAMP $@" >&2
+  echo "[quiz-root] $STAMP $@" >&2
 }
 
 fail() {
