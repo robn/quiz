@@ -1,6 +1,47 @@
 # 🧩 quiz: a tool for rapid OpenZFS development
 
-**quiz** is a program to support fast edit-compile-test cycles for Linux kernel development, with a focus on OpenZFS. At its heart its a qemu-based microvm, stripped down to the essentials to setup and boot a VM and start a test program in under a second.
+**quiz** is a program to support fast edit-compile-test cycles for Linux kernel development, with a focus on OpenZFS. At its heart its a qemu-based microvm, stripped down to the essentials to setup and boot a VM and start a test program in seconds.
+
+## Quick start
+
+For Debian 12 (bookworm).
+
+Install prerequisites:
+
+```
+# for quiz
+$ sudo apt install git curl rsync qemu-system-x86
+
+# for kernel build
+$ sudo apt install make gcc flex bison libelf-dev bc libssl-dev
+
+# for root image build
+$ sudo apt install mmdebstrap genext2fs
+```
+
+Clone the repo:
+
+```
+$ git clone https://github.com/robn/quiz.git
+```
+
+Build a kernel:
+
+```
+$ ./quiz-kernel -k 6.1
+```
+
+Build the root image:
+
+```
+$ ./quiz-root
+```
+
+Start the VM:
+
+```
+$ ./quiz
+```
 
 ## Motivation
 
