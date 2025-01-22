@@ -96,7 +96,8 @@ fi
 rsync -a $RUNDIR/rc/$rc/ $RUNDIR/system/init/.quiz/rc
 cp $RUNDIR/rc/bashrc $RUNDIR/system/init/.quiz/rc
 
-# XXX ensure user dir exists
+# ensure system and user dirs exist
+mkdir -p $RUNDIR/system/work
 mkdir -p $RUNDIR/system/user
 
 # delete profile file insertions from previous runs
