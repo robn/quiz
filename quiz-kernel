@@ -127,6 +127,8 @@ if [[ -z $_quiz_arch_native ]] ; then
   makeopts="$makeopts CROSS_COMPILE=${_quiz_arch_prefix}- ARCH=$_quiz_arch_kernel"
 fi
 
+mkdir -p build/kernel
+
 declare -A kernel_sumfile
 
 kernel_versions=""
@@ -198,7 +200,6 @@ for kver in $kernel_versions ; do
 
   trace "preparing build: $_quiz_kver ($_quiz_ktype)"
 
-  mkdir -p build/kernel
   ksrc=$RUNDIR/build/kernel/linux-$_quiz_ksrcver
 
   if [[ -d $ksrc ]] ; then
