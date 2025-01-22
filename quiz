@@ -204,19 +204,20 @@ qemu_machine_opts=""
 qemu_cpu_opts=""
 case "$_quiz_arch_qemu" in
   x86_64)
-    # XXX I think microvm only works for native CPUs, but I need to test more
-    qemu_machine_opts="-machine microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off,pcie=on"
-    qemu_cpu_opts="-cpu qemu64"
+    # if the host is x86_64 and KVM is available to us, we can use microvm+cpu accel
+    if [[ -n $_quiz_arch_native && -w /dev/kvm ]] ; then
+      qemu_machine_opts="-machine microvm,x-option-roms=off,pit=off,pic=off,rtc=off,isa-serial=off,pcie=on"
+      qemu_cpu_opts="-cpu host -enable-kvm"
+    else
+      qemu_machine_opts="-machine q35"
+      qemu_cpu_opts="-cpu max"
+    fi
     ;;
   ppc64)
     qemu_machine_opts="-machine ppce500"
     qemu_cpu_opts="-cpu e6500"
     ;;
 esac
-
-if [[ -n $_quiz_arch_native ]] ; then
-  qemu_cpu_opts="-cpu host -enable-kvm"
-fi
 
 qemu_mem=${QUIZ_MEM:-2G}
 qemu_cpus=${QUIZ_CPUS:-2}
