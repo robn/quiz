@@ -2,6 +2,10 @@
 
 **quiz** is a program to support fast edit-compile-test cycles for Linux kernel development, with a focus on OpenZFS. At its heart its a qemu-based microvm, stripped down to the essentials to setup and boot a VM and start a test program in seconds.
 
+> [!NOTE]
+> [I just presented quiz at EO2025](https://2025.everythingopen.au/schedule/presentation/77/), which generated some new interest, and reminded me just how out of date this README is. The "quick start" section below is definitely good, I wrote and tested it on 2025-01-22. Beyond that is right in spirit, but behind in some details. I'll get it rewritten as soon as I can. Thanks for your patience!
+> -- @robn, 2025-01-23.
+
 ## Quick start
 
 For Debian 12 (bookworm).
