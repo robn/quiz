@@ -106,7 +106,14 @@ if [[ -n $opt_all_kernels ]] ; then
     fi
 fi
 
-makeopts=""
+# dedicate half the cpus, rounded up, to building kernels
+ncpus=$((($(nproc)+1)/2))
+trace "using $ncpus cpus for kernel builds"
+
+# makeopts are switches for make. makevars are variables added to the end
+makeopts="-j$ncpus"
+makevars=""
+
 if [[ -n $opt_llvm ]] ; then
   IFS=:
   best_clang=$(find $PATH -maxdepth 1 -executable -name "clang-??" -print | \
@@ -119,12 +126,12 @@ if [[ -n $opt_llvm ]] ; then
     trace "found clang-$best_clang, setting LLVM=-$best_clang"
     best_clang="-$best_clang"
   fi
-  makeopts="$makeopts LLVM=$best_clang"
+  makevars="$makevars LLVM=$best_clang"
 fi
 
 if [[ -z $_quiz_arch_native ]] ; then
   trace "setting up for cross-compile: $_quiz_arch_kernel"
-  makeopts="$makeopts CROSS_COMPILE=${_quiz_arch_prefix}- ARCH=$_quiz_arch_kernel"
+  makevars="$makevars CROSS_COMPILE=${_quiz_arch_prefix}- ARCH=$_quiz_arch_kernel"
 fi
 
 mkdir -p build/kernel
@@ -248,7 +255,7 @@ for kver in $kernel_versions ; do
   if [[ -f $ksrc/.config ]] ; then
     if ! grep -q -m1 "^# Linux/$_quiz_arch_kernel" $ksrc/.config ; then
       trace "existing source dir was for a different architecture, cleaning it"
-      make -s -C $ksrc distclean $makeopts
+      make $makeopts -s -C $ksrc distclean $makevars
     fi
   fi
 
@@ -288,16 +295,15 @@ for kver in $kernel_versions ; do
   fi
 
   trace "compiling config: $_quiz_ksrcver"
-
-  make -s -j6 olddefconfig $makeopts
+  make $makeopts -s olddefconfig prepare $makevars
 
   if [[ -z $opt_no_build ]] ; then
-    kimagepath=$(make -s image_name $makeopts)
+    kimagepath=$(make -s $makeopts image_name $makevars)
     kimage=$(basename $kimagepath)
 
     trace "building kernel: $_quiz_ksrcver ($kimage)"
+    make $makeopts $kimage modules $makevars
 
-    make -j6 $makeopts $kimage modules
     trace "installing completed kernel: $_quiz_kver"
 
     mkdir -p $kdest
@@ -316,7 +322,7 @@ for kver in $kernel_versions ; do
     cp -vf $ksrc/System.map $kdest/System.map-$_quiz_kver
 
     # modules tree
-    make -C $ksrc $makeopts modules_install INSTALL_MOD_PATH=$kdest
+    make $makeopts -C $ksrc modules_install INSTALL_MOD_PATH=$kdest $makevars
     /sbin/depmod -b $kdest $_quiz_kver
 
     # extern module build, so we're not dependent on kernel source to rebuild
