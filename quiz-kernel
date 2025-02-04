@@ -217,7 +217,16 @@ for kver in $kernel_versions ; do
         trace "using existing tarball: $ktar"
       else
         trace "downloading: $kurl"
-        curl -# -fOL $kurl
+        mkdir -p tmp
+        curl \
+          --progress-bar \
+          --output-dir tmp \
+          --remote-name \
+          --continue-at - \
+          --location \
+          --fail \
+            $kurl
+        mv tmp/$ktar $ktar
       fi
       tar xf$kzopt $ktar
       ;;
