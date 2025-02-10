@@ -27,7 +27,7 @@ options:
   -K              rebuild all installed kernels
                     (equivalent to -k <v1> -k <v2> ...)
   -U              upgrade kernels (build latest for minor series)
-  -X              with -U, remove old kernels in same minor series
+  -X              remove old kernels in same minor series
   -h              this help
 EOF
   exit 1
@@ -94,9 +94,6 @@ if [[ -n $opt_kernel && -n $opt_all_kernels ]] ; then
 fi
 if [[ -z $opt_kernel && -z $opt_all_kernels ]] ; then
   fail "no kernel version supplied; one of -k or -K required"
-fi
-if [[ -z $opt_upgrade && -n $opt_upgrade_cleanup ]] ; then
-  fail "invalid upgrade options; can't use -X without -U"
 fi
 
 if [[ -n $opt_all_kernels ]] ; then
