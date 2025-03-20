@@ -82,6 +82,7 @@ do_configure() {
   #     and whatnot. installing to /opt/zfs would be preferable, but
   #     zts-tests.sh is hardcoded to /usr for now -- robn, 2025-01-13
   ./configure \
+    --config-cache \
     --with-linux=$RUNDIR/system/kernel/$_quiz_arch_kernel/kbuild/$_quiz_kver \
     --prefix=/usr/local \
     --disable-sysvinit \
