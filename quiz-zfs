@@ -46,7 +46,7 @@ opt_kernel=""
 
 # take the default kernel version from the last configured version
 if [[ -f config.log ]] ; then
-  opt_kernel=$(grep ^LINUX_VERSION= config.log || true | cut -f2 -d"'")
+  opt_kernel=$( ( grep ^LINUX_VERSION= config.log || true ) | cut -f2 -d"'" )
 fi
 
 OPTIND=1
