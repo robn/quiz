@@ -177,7 +177,9 @@ trace "will build kernel versions: $kernel_versions"
 
 kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
 
-for kver in $kernel_versions ; do
+build_kernel() {
+  local kver=$1
+
   quiz_kernel_vars $kver
 
   case $_quiz_ktype in
@@ -357,6 +359,27 @@ for kver in $kernel_versions ; do
       ! -name "*$_quiz_kver" \
     | xargs -r rm -r
   fi
+}
+
+kver_failed=()
+
+for kver in $kernel_versions ; do
+  # capture errors in the build_kernel function by calling it in a subshell
+  # we have to disable our error trap first, then reenable them inside the
+  # subshell so that the function still early aborts, but the subshell doesn't
+  # trigger our error trap.
+  trap - ERR
+  ( trap fail ERR ; build_kernel $kver )
+  rc=$?
+  trap fail ERR
+
+  if [[ $rc -ne 0 ]] ; then
+    kver_failed+=($kver)
+  fi
 done
+
+if [[ ${#kver_failed[*]} -ne 0 ]] ; then
+  trace "kernels failed: ${kver_failed[*]}"
+fi
 
 # vim: ft=bash
