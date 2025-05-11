@@ -97,8 +97,7 @@ rsync -a $RUNDIR/rc/$rc/ $RUNDIR/system/init/.quiz/rc
 cp $RUNDIR/rc/bashrc $RUNDIR/system/init/.quiz/rc
 
 # ensure system and user dirs exist
-mkdir -p $RUNDIR/system/work
-mkdir -p $RUNDIR/system/user
+mkdir -p $RUNDIR/system/{work,user,shared}
 
 # delete profile file insertions from previous runs
 # XXX maybe these should be part of .quiz and in the overlay
@@ -243,6 +242,8 @@ $qemu_bin $qemu_machine_opts $qemu_cpu_opts \
   -device virtio-9p-pci,fsdev=quiz-system,mount_tag=quiz-system \
   -fsdev local,id=quiz-user,path=$RUNDIR/system/user,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-user,mount_tag=quiz-user \
+  -fsdev local,id=quiz-shared,path=$RUNDIR/system/shared,security_model=none \
+  -device virtio-9p-pci,fsdev=quiz-shared,mount_tag=quiz-shared \
   $QUIZ_QEMU_OPTS \
 
 trace "done"

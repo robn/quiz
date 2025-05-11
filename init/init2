@@ -28,6 +28,11 @@ mount -t debugfs none /sys/kernel/debug
 mount -t configfs none /sys/kernel/config
 mount -t bpf none /sys/fs/bpf
 
+# mount the host shared dir
+mkdir /shared
+mount -t 9p -o trans=virtio quiz-shared /shared \
+  -oversion=9p2000.L,posixacl,msize=512000,cache=mmap
+
 #
 # set the terminal size correctly.
 #
