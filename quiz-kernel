@@ -150,7 +150,7 @@ for kver in $opt_kernel ; do
       kernel_sumfile[$_quiz_kmajor]=$sumfile
     fi
     latest=$(cat ${kernel_sumfile[$_quiz_kmajor]} | \
-      sed -Ene "/linux-.+\.tar.xz/ { s/.*linux-($_quiz_kmajor\.$_quiz_kminor\.[0-9]+)\.tar\.xz/\1/ p }" | tail -1)
+      sed -Ene "/linux-.+\.tar\.xz/ { s/.*linux-($_quiz_kmajor\.$_quiz_kminor(\.[0-9]+)?)\.tar\.xz/\1/ p }" | tail -1)
     if [[ -z $latest ]] ; then
       trace "no latest kernel matching $_quiz_kmajor.$_quiz_kminor"
       kver=""
