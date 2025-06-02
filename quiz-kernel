@@ -155,6 +155,10 @@ for kver in $opt_kernel ; do
       trace "no latest kernel matching $_quiz_kmajor.$_quiz_kminor"
       kver=""
     elif [[ -n $opt_upgrade ]] ; then
+      _quiz_kernel_vars $latest
+      if [[ -z $_quiz_kpatch ]] ; then
+        latest="$_quiz_kmajor.$_quiz_kminor.0"
+      fi
       if [[ $latest == $kver ]] ; then
         trace "$kver already latest, not rebuilding"
         kver=""
