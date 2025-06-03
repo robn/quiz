@@ -60,7 +60,7 @@ trace "building root image"
 quiz_extras=tini,udev,coreutils,procps,kmod,gdisk,dmsetup,tmux,cryptsetup
 zfs_extras=libtirpc3,libjemalloc2,libasan8
 zfstest_extras=ksh,bc,bzip2,cpio,file,acl,sysstat,samba-common-bin,openssl,pamtester,pax,iputils-ping,python3-minimal,rsync,openssh-client,binutils,attr,nfs-kernel-server,lsscsi,parted,linux-base,sudo,xxhash
-debug_extras=jq,gdb,strace,bpftrace,linux-perf,xxd,blktrace,mdadm,xfsprogs
+debug_extras=jq,gdb,strace,bpftrace,linux-perf,xxd,blktrace,mdadm,xfsprogs,time,mbuffer,socat
 
 # XXX add things back in the can't be in the default lists because they're
 #     not installable from debian unstable right now. this is all a mess, as
