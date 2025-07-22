@@ -53,9 +53,9 @@ function _quiz_kernel_vars () {
     EOF
   ')
 
-  if [[ -n "${QUIZ_DEBUG_VARS_LL:-}" ]] ; then
+  if [[ -n "${QUIZ_DEBUG_VARS_PARSE:-}" ]] ; then
     cat 2>&1 <<EOF
-DEBUG: exploded kernel version: $kver
+DEBUG: exploded kernel version (parse): $kver
        _quiz_kmajor:      $_quiz_kmajor
        _quiz_kminor:      $_quiz_kminor
        _quiz_kpatch:      $_quiz_kpatch

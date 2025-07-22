@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MPL-2.0
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright (c) 2023-2025, Rob Norris <robn@despairlabs.com>
+
+#
+# This is a small test suite for some of quiz's library functions, which
+# are often fiddly.
+#
+
+set -euo pipefail
+
+trace() {
+  local STAMP=$(date +%Y%m%d-%H:%M:%S)
+  echo "[quiz-test] $STAMP $@" >&2
+}
+
+fail() {
+  trace "FATAL $@"
+  exit 1
+}
+trap fail ERR
+
+RUNDIR=$(realpath $(dirname $0))
+source $RUNDIR/quiz-config
+source $RUNDIR/quiz-lib
+
+function _quiz_test_check () {
+  if [[ $2 != $3 ]] ; then
+    err+=("$(printf "%6s: %-25s %-25s" $1 "expected: [$2]" "got: [$3]")")
+  fi
+  return 0
+}
+
+function quiz_test_kernel_vars () {
+  cat <<-EOT | \
+    # input     ver         srcver    type        maj min patch typpatch
+    6.1         6.1.0       6.1       release     6   1   0     0
+    6.1.0       6.1.0       6.1       release     6   1   0     0
+    6.1-rc1     6.1.0-rc1   6.1-rc1   rc          6   1   0     1
+    6.1.0-rc1   6.1.0-rc1   6.1-rc1   rc          6   1   0     1
+    6.1.1       6.1.1       6.1.1     release     6   1   1     0
+    6.1.2       6.1.2       6.1.2     release     6   1   2     0
+    5.10.217    5.10.217    5.10.217  release     5   10  217   0
+    6.10-rc1    6.10.0-rc1  6.10-rc1  rc          6   10  0     1
+    6.10.0-rc1  6.10.0-rc1  6.10-rc1  rc          6   10  0     1
+EOT
+  grep -v '^#' | \
+  while read kin kver ksrcver ktype kmajor kminor kpatch ktypepatch; do
+    quiz_kernel_vars $kin || true
+    local err=()
+    _quiz_test_check "ver"    "$kver"    "$_quiz_kver"
+    _quiz_test_check "srcver" "$ksrcver" "$_quiz_ksrcver"
+    _quiz_test_check "type"   "$ktype"   "$_quiz_ktype"
+    _quiz_test_check "major"  "$kmajor"  "$_quiz_kmajor"
+    _quiz_test_check "minor"  "$kminor"  "$_quiz_kminor"
+    _quiz_test_check "patch"  "$kpatch"  "$_quiz_kpatch"
+    if [[ ${#err[*]} -eq 0 ]] ; then
+      echo "$kin: PASS"
+    else
+      echo "$kin: FAIL"
+      local _ifs="$IFS"
+      IFS=$'\n'
+      echo "${err[*]}"
+      IFS="$_ifs"
+    fi
+  done
+}
+
+quiz_test_kernel_vars
+
+# vim: ft=bash
