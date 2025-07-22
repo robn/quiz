@@ -38,27 +38,28 @@ function _quiz_test_check () {
 
 function quiz_test_kernel_vars () {
   cat <<-EOT | \
-    # input     ver         srcver    type        maj min patch typpatch
-    6.1         6.1.0       6.1       release     6   1   0     0
-    6.1.0       6.1.0       6.1       release     6   1   0     0
-    6.1-rc1     6.1.0-rc1   6.1-rc1   rc          6   1   0     1
-    6.1.0-rc1   6.1.0-rc1   6.1-rc1   rc          6   1   0     1
-    6.1.1       6.1.1       6.1.1     release     6   1   1     0
-    6.1.2       6.1.2       6.1.2     release     6   1   2     0
-    5.10.217    5.10.217    5.10.217  release     5   10  217   0
-    6.10-rc1    6.10.0-rc1  6.10-rc1  rc          6   10  0     1
-    6.10.0-rc1  6.10.0-rc1  6.10-rc1  rc          6   10  0     1
+  #input                ver                   srcver              type     maj  min  patch  typpatch
+  6.1                   6.1.0                 6.1                 release  6    1    0
+  6.1.0                 6.1.0                 6.1                 release  6    1    0
+  6.1-rc1               6.1.0-rc1             6.1-rc1             rc       6    1    0      1
+  6.1.0-rc1             6.1.0-rc1             6.1-rc1             rc       6    1    0      1
+  6.1.1                 6.1.1                 6.1.1               release  6    1    1
+  6.1.2                 6.1.2                 6.1.2               release  6    1    2
+  5.10.217              5.10.217              5.10.217            release  5    10   217
+  6.10-rc1              6.10.0-rc1            6.10-rc1            rc       6    10   0      1
+  6.10.0-rc1            6.10.0-rc1            6.10-rc1            rc       6    10   0      1
 EOT
   grep -v '^#' | \
   while read kin kver ksrcver ktype kmajor kminor kpatch ktypepatch; do
     quiz_kernel_vars $kin || true
     local err=()
-    _quiz_test_check "ver"    "$kver"    "$_quiz_kver"
-    _quiz_test_check "srcver" "$ksrcver" "$_quiz_ksrcver"
-    _quiz_test_check "type"   "$ktype"   "$_quiz_ktype"
-    _quiz_test_check "major"  "$kmajor"  "$_quiz_kmajor"
-    _quiz_test_check "minor"  "$kminor"  "$_quiz_kminor"
-    _quiz_test_check "patch"  "$kpatch"  "$_quiz_kpatch"
+    _quiz_test_check "ver"      "$kver"       "$_quiz_kver"
+    _quiz_test_check "srcver"   "$ksrcver"    "$_quiz_ksrcver"
+    _quiz_test_check "type"     "$ktype"      "$_quiz_ktype"
+    _quiz_test_check "major"    "$kmajor"     "$_quiz_kmajor"
+    _quiz_test_check "minor"    "$kminor"     "$_quiz_kminor"
+    _quiz_test_check "patch"    "$kpatch"     "$_quiz_kpatch"
+    _quiz_test_check "typpatch" "$ktypepatch" "$_quiz_ktype_patch"
     if [[ ${#err[*]} -eq 0 ]] ; then
       echo "$kin: PASS"
     else
