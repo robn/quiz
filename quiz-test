@@ -72,6 +72,25 @@ EOT
   done
 }
 
+opt_verbose=""
+
+OPTIND=1
+while getopts "v" opt
+do
+  case "$opt" in
+    'v') opt_verbose="$opt_verbose$opt" ;;
+    *) exit 1 ;;
+  esac
+done
+shift $(expr $OPTIND - 1)
+
+if [[ ${#opt_verbose} -ge 1 ]] ; then
+  export QUIZ_DEBUG_VARS=1
+fi
+if [[ ${#opt_verbose} -ge 2 ]] ; then
+  export QUIZ_DEBUG_VARS_PARSE=1
+fi
+
 quiz_test_kernel_vars
 
 # vim: ft=bash
