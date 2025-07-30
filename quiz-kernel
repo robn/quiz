@@ -192,17 +192,21 @@ build_kernel() {
     ktar=linux-$_quiz_ksrcver.tar.xz
     kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$ktar
     kzopt=J
+    kuntar=linux-$_quiz_ksrcver
     ;;
   rc)
     ksrctype=tar
     ktar=linux-$_quiz_ksrcver.tar.gz
     kurl=https://git.kernel.org/torvalds/t/$ktar
     kzopt=z
+    kuntar=linux-$_quiz_ksrcver
     ;;
   next)
-    ksrctype=git
-    kgiturl=git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    kgittag=next-$_quiz_ktype_patch # XXX is this kinda $_quiz_ksrcver?
+    ksrctype=tar
+    ktar=next-$_quiz_ktype_patch.tar.gz
+    kurl=https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/snapshot/linux-next-$ktar
+    kzopt=z
+    kuntar=linux-next-next-$_quiz_ktype_patch
     ;;
   *)
     fail "unknown kernel version type: $_quiz_ktype"
@@ -210,7 +214,7 @@ build_kernel() {
 
   trace "preparing build: $_quiz_kver ($_quiz_ktype)"
 
-  ksrc=$RUNDIR/build/kernel/linux-$_quiz_ksrcver
+  ksrc=$RUNDIR/build/kernel/$kuntar
 
   if [[ -d $ksrc ]] ; then
     trace "using existing source dir: $ksrc"
@@ -231,7 +235,7 @@ build_kernel() {
         curl \
           --progress-bar \
           --output-dir tmp \
-          --remote-name \
+          --output $ktar \
           --continue-at - \
           --location \
           --fail \
@@ -262,6 +266,28 @@ build_kernel() {
     fi
   fi
 
+  _do_mrproper=0
+  if [[ $_quiz_ktype = "next" ]] ; then
+    # get rid of -rcX or similar. this is already too complicated
+    sed -i -E 's/^(EXTRAVERSION =) .*/\1/' $ksrc/Makefile
+
+    if [[ ! -f $ksrc/include/config/auto.conf ]] ; then
+      # sigh, circular dependency. we need a config set up to be able to
+      # query the version. which we need for a config
+      trace "prepping source tree for pre-config"
+      make $makeopts -s -C $ksrc tinyconfig prepare $makevars
+      _do_mrproper=1
+    fi
+
+    quiz_kernel_vars $(make -s -C $ksrc kernelrelease)
+    trace "updated version from makefile: $_quiz_kver"
+
+    if [[ $_do_mrproper ]] ; then
+      # and then cleanup from above, so it'll start fresh with the new config
+      make $makeopts -s -C $ksrc mrproper $makevars
+    fi
+  fi
+
   kcfg=config-$_quiz_kmajor.$_quiz_kminor
   if [[ -z $opt_no_config ]] ; then
     working_kcfg=$kcfg
@@ -284,8 +310,7 @@ build_kernel() {
     fi
 
     trace "installing config: $working_kcfg"
-    cp kernel/$_quiz_arch_kernel/$working_kcfg \
-      build/kernel/linux-$_quiz_ksrcver/.config
+    cp kernel/$_quiz_arch_kernel/$working_kcfg $ksrc/.config
   else
     trace "NOT installing config as requested"
   fi

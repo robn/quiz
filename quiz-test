@@ -48,6 +48,8 @@ function quiz_test_kernel_vars () {
   5.10.217              5.10.217              5.10.217            release  5    10   217
   6.10-rc1              6.10.0-rc1            6.10-rc1            rc       6    10   0      1
   6.10.0-rc1            6.10.0-rc1            6.10-rc1            rc       6    10   0      1
+  next-20250721         0.0.0-next-20250721   0.0-next-20250721   next     0    0    0      20250721
+  6.16.0-next-20250618  6.16.0-next-20250618  6.16-next-20250618  next     6    16   0      20250618
 EOT
   grep -v '^#' | \
   while read kin kver ksrcver ktype kmajor kminor kpatch ktypepatch; do

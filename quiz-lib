@@ -33,25 +33,33 @@ function _quiz_kernel_vars () {
   _quiz_ktype=""
   _quiz_ktype_patch=""
 
-  shopt -s lastpipe
-  eval $(echo $kver | perl -nE '
-    ($maj, $min, $pat, $ty, $typat) = m/
-      ^
-        ([1-9][0-9]*)                   # major
-        \.                              # dot sep
-        (0|[1-9][0-9]*)                 # minor
-        (?:\.(0|[1-9][0-9]*))?          # patch 1+, optional
-        (?:-(rc|next)-?([1-9][0-9]*))?  # type & typepatch
-      $
-    /gx;
-    print <<~EOF;
-      _quiz_kmajor=$maj
-      _quiz_kminor=$min
-      _quiz_kpatch=$pat
-      _quiz_ktype=$ty
-      _quiz_ktype_patch=$typat
-    EOF
-  ')
+  if [[ ${kver%%-*} = "next" ]] ; then
+    _quiz_kmajor=0
+    _quiz_kminor=0
+    _quiz_kpatch=0
+    _quiz_ktype=next
+    _quiz_ktype_patch=${kver##next-}
+  else
+    shopt -s lastpipe
+    eval $(echo $kver | perl -nE '
+      ($maj, $min, $pat, $ty, $typat) = m/
+        ^
+          ([1-9][0-9]*)                   # major
+          \.                              # dot sep
+          (0|[1-9][0-9]*)                 # minor
+          (?:\.(0|[1-9][0-9]*))?          # patch 1+, optional
+          (?:-(rc|next)-?([1-9][0-9]*))?  # type & typepatch
+        $
+      /gx;
+      print <<~EOF;
+        _quiz_kmajor=$maj
+        _quiz_kminor=$min
+        _quiz_kpatch=$pat
+        _quiz_ktype=$ty
+        _quiz_ktype_patch=$typat
+      EOF
+    ')
+  fi
 
   if [[ -n "${QUIZ_DEBUG_VARS_PARSE:-}" ]] ; then
     cat 2>&1 <<EOF
@@ -134,15 +142,22 @@ function quiz_kernel_best_available () {
     _quiz_kernel_image=$image
   else
     # partial version specified, choose from best available
-    local candidates="$(find $kernel_dir -maxdepth 1 -name "kernel-$_quiz_ksrcver.*" | cut -f2- -d- | sort -V)"
+    local matchtype=$_quiz_ktype
+    local searchpat
+    if [[ $_quiz_ktype = "next" ]] ; then
+      searchpat="kernel-*-$_quiz_ktype-$_quiz_ktype_patch"
+    else
+      searchpat="kernel-$_quiz_ksrcver.*"
+    fi
+    local candidates="$(find $kernel_dir -maxdepth 1 -name $searchpat | cut -f2- -d- | sort -V)"
     local best=""
     for candidate in $candidates ; do
       quiz_kernel_vars $candidate
-      if [[ $_quiz_ktype != "release" ]] ; then
+      if [[ $_quiz_ktype != $matchtype ]] ; then
         trace "skipped non-release kernel image: $_quiz_kver"
       else
         best="$_quiz_kver"
-        trace "matched release kernel image: $_quiz_kver"
+        trace "matched kernel image: $_quiz_kver"
       fi
     done
     if [[ -z $best ]] ; then
