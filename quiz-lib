@@ -235,7 +235,7 @@ function quiz_debian_vars () {
   case "$_quiz_arch" in
     x86_64)
       _quiz_debian_arch=amd64
-      _quiz_debian_release=bookworm
+      _quiz_debian_release=trixie
       _quiz_debian_mirror="https://deb.debian.org/debian"
       ;;
     ppc64)
