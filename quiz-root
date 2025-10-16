@@ -72,6 +72,8 @@ fi
 image_basefile=$_quiz_debian_release.$_quiz_debian_arch
 
 mmdebstrap \
+  --mode=unshare \
+  --format=ext2 \
   --arch=$_quiz_debian_arch \
   --variant=minbase \
   --include=$quiz_extras,$zfs_extras,$zfstest_extras,$debug_extras \
