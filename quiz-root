@@ -65,7 +65,7 @@ debug_extras=jq,gdb,strace,bpftrace,linux-perf,xxd,blktrace,mdadm,e2fsprogs,xfsp
 # XXX add things back in the can't be in the default lists because they're
 #     not installable from debian unstable right now. this is all a mess, as
 #     you see -- robn, 2025-01-10
-if [[ $_quiz_debian_arch == "amd64" ]] ; then
+if [[ $_quiz_debian_release != "unstable" ]] ; then
   zfstest_extras="$zfstest_extras,fio"
 fi
 
