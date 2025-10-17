@@ -212,6 +212,14 @@ case "$_quiz_arch_qemu" in
       qemu_cpu_opts="-cpu max"
     fi
     ;;
+  aarch64)
+    qemu_machine_opts="-machine virt"
+    if [[ -n $_quiz_arch_native && -w /dev/kvm ]] ; then
+      qemu_cpu_opts="-cpu host -enable-kvm"
+    else
+      qemu_cpu_opts="-cpu cortex-a53"
+    fi
+    ;;
   ppc64)
     qemu_machine_opts="-machine ppce500"
     qemu_cpu_opts="-cpu e6500"
