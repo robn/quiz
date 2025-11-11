@@ -176,30 +176,22 @@ function quiz_arch_vars () {
     fail "no architecture set. use -a or set QUIZ_ARCH"
   fi
 
-  _quiz_arch=""
+  # defaults
+  _quiz_arch=$arch
   _quiz_arch_kernel=""
-  _quiz_arch_qemu=""
-  _quiz_arch_prefix=""
+  _quiz_arch_qemu=$arch
+  _quiz_arch_prefix=$arch-linux-gnu
   _quiz_arch_native=""
 
   case "$arch" in
     x86_64)
-      _quiz_arch=x86_64
       _quiz_arch_kernel=x86
-      _quiz_arch_qemu=x86_64
-      _quiz_arch_prefix=x86_64-linux-gnu
       ;;
     aarch64)
-      _quiz_arch=aarch64
       _quiz_arch_kernel=arm64
-      _quiz_arch_qemu=aarch64
-      _quiz_arch_prefix=aarch64-linux-gnu
       ;;
     ppc64)
-      _quiz_arch=ppc64
       _quiz_arch_kernel=powerpc
-      _quiz_arch_qemu=ppc64
-      _quiz_arch_prefix=powerpc64-linux-gnu
       ;;
     *)
       fail "no support for architecture: $arch"
@@ -234,20 +226,17 @@ function quiz_debian_vars () {
     fail "internal error: call quiz_arch_vars() first"
   fi
 
+  # defaults for supported architectures
   _quiz_debian_arch=""
-  _quiz_debian_release=""
-  _quiz_debian_mirror=""
+  _quiz_debian_release=trixie
+  _quiz_debian_mirror="https://deb.debian.org/debian"
 
   case "$_quiz_arch" in
     x86_64)
       _quiz_debian_arch=amd64
-      _quiz_debian_release=trixie
-      _quiz_debian_mirror="https://deb.debian.org/debian"
       ;;
     aarch64)
       _quiz_debian_arch=arm64
-      _quiz_debian_release=trixie
-      _quiz_debian_mirror="https://deb.debian.org/debian"
       ;;
     ppc64)
       _quiz_debian_arch=ppc64
