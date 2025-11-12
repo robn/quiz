@@ -220,6 +220,10 @@ case "$_quiz_arch_qemu" in
       qemu_cpu_opts="-cpu cortex-a53"
     fi
     ;;
+  riscv64)
+    qemu_machine_opts="-machine virt"
+    qemu_cpu_opts="-cpu sifive-u54"
+    ;;
   ppc64)
     qemu_machine_opts="-machine ppce500"
     qemu_cpu_opts="-cpu e6500"

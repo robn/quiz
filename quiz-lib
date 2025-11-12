@@ -193,6 +193,9 @@ function quiz_arch_vars () {
     ppc64)
       _quiz_arch_kernel=powerpc
       ;;
+    riscv64)
+      _quiz_arch_kernel=riscv
+      ;;
     *)
       fail "no support for architecture: $arch"
       ;;
@@ -237,6 +240,9 @@ function quiz_debian_vars () {
       ;;
     aarch64)
       _quiz_debian_arch=arm64
+      ;;
+    riscv64)
+      _quiz_debian_arch=riscv64
       ;;
     ppc64)
       _quiz_debian_arch=ppc64
