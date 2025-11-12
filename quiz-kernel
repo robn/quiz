@@ -334,6 +334,22 @@ build_kernel() {
   make $makeopts -s olddefconfig prepare $makevars
 
   if [[ -z $opt_no_build ]] ; then
+
+    # XXX image_name actually returns the name of the image produced by the
+    #     last completed build. this has bitten me when bootstrapping a new
+    #     architecture, when I realise that I'm taking a compressed image
+    #     but the bootloader wants a raw image. the next run after I realise
+    #     fixes it, because the _previous_ run did an uncompressed image.
+    #
+    #     it's not clear to me what, if any, solution is needed here. doing
+    #     a mrproper round like above definitely fixes it, but we lose all
+    #     the output from the previous run. maybe I should burn all images
+    #     from the previous run too? or maybe doesn't matter, and this is just
+    #     a "note to self" that I'll find when I'm ripping my hair out next
+    #     time.
+    #
+    #       -- robn, 2025-11-12 
+
     kimagepath=$(make -s $makeopts image_name $makevars)
     kimage=$(basename $kimagepath)
 
