@@ -224,6 +224,9 @@ case "$_quiz_arch_qemu" in
     qemu_machine_opts="-machine ppce500"
     qemu_cpu_opts="-cpu e6500"
     ;;
+  *)
+    fail "no support for architecture: $_quiz_arch_qemu"
+    ;;
 esac
 
 qemu_mem=${QUIZ_MEM:-2G}
