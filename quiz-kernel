@@ -22,6 +22,7 @@ options:
                     (can be used multiple times)
   -u              update standard config for this kernel minor version
   -L              build with LLVM/Clang
+  -T              initialise missing config from tinyconfig
   -C              don't install kernel config before build
   -B              don't build kernel
   -K              rebuild all installed kernels
@@ -54,6 +55,7 @@ source $RUNDIR/quiz-lib
 
 opt_arch=""
 opt_kernel=""
+opt_init_config=""
 opt_no_config=""
 opt_no_build=""
 opt_llvm=""
@@ -64,11 +66,12 @@ opt_upgrade=""
 opt_upgrade_cleanup=""
 
 OPTIND=1
-while getopts "a:k:CBe:d:m:uLKUXh" opt
+while getopts "a:k:ICBe:d:m:uLKUXh" opt
 do
   case "$opt" in
     'a') opt_arch=$OPTARG ;;
     'k') opt_kernel="$opt_kernel $OPTARG" ;;
+    'I') opt_init_config=1 ;;
     'C') opt_no_config=1 ;;
     'B') opt_no_build=1 ;;
     'e') opt_modify_config="$opt_modify_config -e $OPTARG" ;;
@@ -302,14 +305,20 @@ build_kernel() {
       fi
     fi
     if [[ -z $found_kcfg ]] ; then
-      fail "no usable config found!"
-    fi
-    if [[ $kcfg != $found_kcfg ]] ; then
-      trace "specific config not found, using fallback: $found_kcfg"
-    fi
+      if [[ -z $opt_init_config ]] ; then
+        fail "no usable config found!"
+      fi
+      trace "no usable config found, bootstrapping from tinyconfig"
+      make $makeopts -s -C $ksrc tinyconfig $makevars
+      # XXX encode other essential config here -- robn, 2025-11-12
+    else
+      if [[ $kcfg != $found_kcfg ]] ; then
+        trace "specific config not found, using fallback: $found_kcfg"
+      fi
 
-    trace "installing config: $found_kcfg"
-    cp kernel/$_quiz_arch_kernel/$found_kcfg $ksrc/.config
+      trace "installing config: $found_kcfg"
+      cp kernel/$_quiz_arch_kernel/$found_kcfg $ksrc/.config
+    fi
   else
     trace "NOT installing config as requested"
   fi
