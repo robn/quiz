@@ -386,7 +386,8 @@ build_kernel() {
     (
       cd $ksrc
       archdir=arch/$_quiz_arch_kernel
-      find Makefile include scripts tools/objtool/objtool -type f -o -type l
+      find Makefile vmlinux include -type f -o -type l
+      find scripts tools -executable -type f -o -type l
       find $archdir -maxdepth 1 -name 'Makefile*'
       find $archdir -name include -o -name scripts -type d
       find $archdir/include Module.symvers include scripts -type f
