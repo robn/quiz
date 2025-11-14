@@ -32,7 +32,7 @@ $ git clone https://github.com/robn/quiz.git
 Build a kernel:
 
 ```
-$ ./quiz-kernel -k 6.1
+$ ./quiz-kernel -k 6.17
 ```
 
 Build the root image:
