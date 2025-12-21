@@ -196,6 +196,9 @@ function quiz_arch_vars () {
     riscv64)
       _quiz_arch_kernel=riscv
       ;;
+    loongarch64)
+      _quiz_arch_kernel=loongarch
+      ;;
     *)
       fail "no support for architecture: $arch"
       ;;
@@ -246,6 +249,11 @@ function quiz_debian_vars () {
       ;;
     ppc64)
       _quiz_debian_arch=ppc64
+      _quiz_debian_release=unstable
+      _quiz_debian_mirror="[trusted=yes] https://deb.debian.org/debian-ports"
+      ;;
+    loongarch64)
+      _quiz_debian_arch=loong64
       _quiz_debian_release=unstable
       _quiz_debian_mirror="[trusted=yes] https://deb.debian.org/debian-ports"
       ;;
