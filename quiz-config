@@ -29,6 +29,9 @@ QUIZ_CPUS=2
 QUIZ_KERNEL_OPTS=""
 QUIZ_QEMU_OPTS=""
 
+# prefix command for builds
+QUIZ_BUILD_CMD_PREFIX=""
+
 # profile: blockdev
 QUIZ_BLOCKDEV_COUNT=2
 QUIZ_BLOCKDEV_SIZE=100M

@@ -81,7 +81,7 @@ do_configure() {
   # XXX bunch of this needs to go into configure proper, disabling contrib
   #     and whatnot. installing to /opt/zfs would be preferable, but
   #     zts-tests.sh is hardcoded to /usr for now -- robn, 2025-01-13
-  ./configure \
+  $QUIZ_BUILD_CMD_PREFIX ./configure \
     --config-cache \
     --with-linux=$RUNDIR/system/kernel/$_quiz_arch_kernel/kbuild/$_quiz_kver \
     --prefix=/usr/local \
@@ -98,7 +98,7 @@ do_configure() {
 }
 
 do_make() {
-  make "$@"
+  $QUIZ_BUILD_CMD_PREFIX make "$@"
 }
 
 do_make_install() {
@@ -109,11 +109,11 @@ do_make_install() {
   done
 
   kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
-  make install \
+  $QUIZ_BUILD_CMD_PREFIX make install \
     INSTALL_MOD_PATH=$kdest \
     DESTDIR=$RUNDIR/system/work \
     "$@"
-  /sbin/depmod -A -b $kdest $_quiz_kver
+  $QUIZ_BUILD_CMD_PREFIX /sbin/depmod -A -b $kdest $_quiz_kver
 }
 
 case "$1" in

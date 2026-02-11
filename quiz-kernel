@@ -265,7 +265,7 @@ build_kernel() {
   if [[ -f $ksrc/.config ]] ; then
     if ! grep -q -m1 "^# Linux/$_quiz_arch_kernel" $ksrc/.config ; then
       trace "existing source dir was for a different architecture, cleaning it"
-      make $makeopts -s -C $ksrc distclean $makevars
+      $QUIZ_BUILD_CMD_PREFIX make $makeopts -s -C $ksrc distclean $makevars
     fi
   fi
 
@@ -278,7 +278,7 @@ build_kernel() {
       # sigh, circular dependency. we need a config set up to be able to
       # query the version. which we need for a config
       trace "prepping source tree for pre-config"
-      make $makeopts -s -C $ksrc tinyconfig prepare $makevars
+      $QUIZ_BUILD_CMD_PREFIX make $makeopts -s -C $ksrc tinyconfig prepare $makevars
       _do_mrproper=1
     fi
 
@@ -287,7 +287,7 @@ build_kernel() {
 
     if [[ $_do_mrproper ]] ; then
       # and then cleanup from above, so it'll start fresh with the new config
-      make $makeopts -s -C $ksrc mrproper $makevars
+      $QUIZ_BUILD_CMD_PREFIX make $makeopts -s -C $ksrc mrproper $makevars
     fi
   fi
 
@@ -309,7 +309,7 @@ build_kernel() {
         fail "no usable config found!"
       fi
       trace "no usable config found, bootstrapping from tinyconfig"
-      make $makeopts -s -C $ksrc tinyconfig $makevars
+      $QUIZ_BUILD_CMD_PREFIX make $makeopts -s -C $ksrc tinyconfig $makevars
       # XXX encode other essential config here -- robn, 2025-11-12
     else
       if [[ $kcfg != $found_kcfg ]] ; then
@@ -331,7 +331,7 @@ build_kernel() {
   fi
 
   trace "compiling config: $_quiz_ksrcver"
-  make $makeopts -s olddefconfig prepare $makevars
+  $QUIZ_BUILD_CMD_PREFIX make $makeopts -s olddefconfig prepare $makevars
 
   if [[ -z $opt_no_build ]] ; then
 
@@ -354,7 +354,7 @@ build_kernel() {
     kimage=$(basename $kimagepath)
 
     trace "building kernel: $_quiz_ksrcver ($kimage)"
-    make $makeopts $kimage modules $makevars
+    $QUIZ_BUILD_CMD_PREFIX make $makeopts $kimage modules $makevars
 
     trace "installing completed kernel: $_quiz_kver"
 
@@ -374,7 +374,7 @@ build_kernel() {
     cp -vf $ksrc/System.map $kdest/System.map-$_quiz_kver
 
     # modules tree
-    make $makeopts -C $ksrc modules_install INSTALL_MOD_PATH=$kdest $makevars
+    $QUIZ_BUILD_CMD_PREFIX make $makeopts -C $ksrc modules_install INSTALL_MOD_PATH=$kdest $makevars
     /sbin/depmod -b $kdest $_quiz_kver
 
     # extern module build, so we're not dependent on kernel source to rebuild
