@@ -192,24 +192,24 @@ build_kernel() {
   case $_quiz_ktype in
   release)
     ksrctype=tar
-    ktar=linux-$_quiz_ksrcver.tar.xz
-    kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$ktar
+    karchive=linux-$_quiz_ksrcver.tar.xz
+    kurl=https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/$karchive
     kzopt=J
-    kuntar=linux-$_quiz_ksrcver
+    kdir=linux-$_quiz_ksrcver
     ;;
   rc)
     ksrctype=tar
-    ktar=linux-$_quiz_ksrcver.tar.gz
-    kurl=https://git.kernel.org/torvalds/t/$ktar
+    karchive=linux-$_quiz_ksrcver.tar.gz
+    kurl=https://git.kernel.org/torvalds/t/$karchive
     kzopt=z
-    kuntar=linux-$_quiz_ksrcver
+    kdir=linux-$_quiz_ksrcver
     ;;
   next)
     ksrctype=tar
-    ktar=next-$_quiz_ktype_patch.tar.gz
-    kurl=https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/snapshot/linux-next-$ktar
+    karchive=next-$_quiz_ktype_patch.tar.gz
+    kurl=https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/snapshot/linux-next-$karchive
     kzopt=z
-    kuntar=linux-next-next-$_quiz_ktype_patch
+    kdir=linux-next-next-$_quiz_ktype_patch
     ;;
   *)
     fail "unknown kernel version type: $_quiz_ktype"
@@ -217,7 +217,7 @@ build_kernel() {
 
   trace "preparing build: $_quiz_kver ($_quiz_ktype)"
 
-  ksrc=$RUNDIR/build/kernel/$kuntar
+  ksrc=$RUNDIR/build/kernel/$kdir
 
   if [[ -d $ksrc ]] ; then
     trace "using existing source dir: $ksrc"
@@ -229,23 +229,27 @@ build_kernel() {
     trace "setting up for build in: $ksrc"
     pushd build/kernel > /dev/null
     case $ksrctype in
-    tar)
-      if [[ -f $ktar ]] ; then
-        trace "using existing tarball: $ktar"
+    tar|zip)
+      if [[ -f $karchive ]] ; then
+        trace "using existing archive: $karchive"
       else
         trace "downloading: $kurl"
         mkdir -p tmp
         curl \
           --progress-bar \
           --output-dir tmp \
-          --output $ktar \
+          --output $karchive \
           --continue-at - \
           --location \
           --fail \
             $kurl
-        mv tmp/$ktar $ktar
+        mv tmp/$karchive $karchive
       fi
-      tar xf$kzopt $ktar
+      if [[ $ksrctype == 'tar' ]] ; then
+        tar xf$kzopt $karchive
+      elif [[ $ksrctype == 'zip' ]] ; then
+        unzip $karchive
+      fi
       ;;
     git)
       trace "cloning: $kgittag @ $kgiturl"
