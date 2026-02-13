@@ -223,7 +223,12 @@ build_kernel() {
     trace "using existing source dir: $ksrc"
     if [[ $ksrctype == 'git' ]] ; then
       trace "cleaning up git dir: $ksrc"
-      git -C $ksrc clean -fdx
+      # XXX could we be less destructive if we're building the same again?
+      #     (maybe check localversion-quiz?) -- robn, 2026-02-13
+      git -C $ksrc clean -fdxq
+      # XXX is this the right place to update? should it require -u?
+      #       -- robn, 2026-02-13
+      git -C $ksrc pull
     fi
   else
     trace "setting up for build in: $ksrc"
@@ -253,11 +258,13 @@ build_kernel() {
       ;;
     git)
       trace "cloning: $kgittag @ $kgiturl"
+      # XXX obviously --depth=1 would be preferable, but we need the history
+      #     to generate the version, unless we decide to do our own thing
+      #       -- robn, 2026-02-13
       git clone \
         --config advice.detachedHead=false \
-        --depth 1 \
         --branch $kgittag \
-          $kgiturl linux-$_quiz_ksrcver
+          $kgiturl $kdir
       ;;
     *)
       fail "unknown kernel source type: $ksrctype"
@@ -286,6 +293,10 @@ build_kernel() {
       _do_mrproper=1
     fi
 
+    if [[ $ksrctype = "git" ]] ; then
+      # for git builds, setup LOCALVERSION=-<type>-<hash>
+      echo -$_quiz_ktype-$(git -C $ksrc rev-parse --short HEAD) > $ksrc/localversion-quiz
+    fi
     quiz_kernel_vars $(make -s -C $ksrc kernelrelease)
     trace "updated version from makefile: $_quiz_kver"
 
