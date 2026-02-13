@@ -211,6 +211,12 @@ build_kernel() {
     kzopt=z
     kdir=linux-next-next-$_quiz_ktype_patch
     ;;
+  master)
+    ksrctype=git
+    kgittag=master
+    kgiturl=https://github.com/torvalds/linux.git
+    kdir=linux-master-git
+    ;;
   *)
     fail "unknown kernel version type: $_quiz_ktype"
   esac
@@ -281,7 +287,7 @@ build_kernel() {
   fi
 
   _do_mrproper=0
-  if [[ $_quiz_ktype = "next" ]] ; then
+  if [[ $_quiz_ktype = "next" || $_quiz_ktype = "master" ]] ; then
     # get rid of -rcX or similar. this is already too complicated
     sed -i -E 's/^(EXTRAVERSION =) .*/\1/' $ksrc/Makefile
 

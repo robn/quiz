@@ -39,6 +39,12 @@ function _quiz_kernel_vars () {
     _quiz_kpatch=0
     _quiz_ktype=next
     _quiz_ktype_patch=${kver##next-}
+  elif [[ $kver = "master" ]] ; then
+    _quiz_kmajor=0
+    _quiz_kminor=0
+    _quiz_kpatch=0
+    _quiz_ktype=master
+    _quiz_ktype_patch=
   else
     shopt -s lastpipe
     eval $(echo $kver | perl -nE '
@@ -48,7 +54,14 @@ function _quiz_kernel_vars () {
           \.                              # dot sep
           (0|[1-9][0-9]*)                 # minor
           (?:\.(0|[1-9][0-9]*))?          # patch 1+, optional
-          (?:-(rc|next)-?([1-9][0-9]*))?  # type & typepatch
+          (?:
+            -(rc|next|master)             # type
+            (?:-?(
+              (?:[0-9a-f]+\+)             # typpatch: git ref
+            |
+              (?:[1-9][0-9]*)             # typpatch: number
+            )?)
+          )?
         $
       /gx;
       print <<~EOF;
@@ -105,6 +118,14 @@ function quiz_kernel_vars () {
   elif [[ $_quiz_ktype == "next" ]] ; then
     _quiz_kver=$_quiz_kmajor.$_quiz_kminor.0-$_quiz_ktype-$_quiz_ktype_patch
     _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype-$_quiz_ktype_patch
+  elif [[ $_quiz_ktype == "master" ]] ; then
+    if [[ -n $_quiz_ktype_patch ]] ; then
+      _quiz_kver=$_quiz_kmajor.$_quiz_kminor.0-$_quiz_ktype-$_quiz_ktype_patch
+      _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype-$_quiz_ktype_patch
+    else
+      _quiz_kver=$_quiz_kmajor.$_quiz_kminor.0-$_quiz_ktype
+      _quiz_ksrcver=$_quiz_kmajor.$_quiz_kminor-$_quiz_ktype
+    fi
   fi
 
   if [[ -n "${QUIZ_DEBUG_VARS:-}" ]] ; then
