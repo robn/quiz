@@ -255,7 +255,7 @@ $qemu_bin $qemu_machine_opts $qemu_cpu_opts \
   -device virtio-blk-pci,drive=root,serial=root \
   -fsdev local,id=quiz-init,path=$RUNDIR/system/init,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-init,mount_tag=quiz-init \
-  -fsdev local,id=quiz-kernel,path=$RUNDIR/system/kernel/$_quiz_arch_kernel,security_model=none,readonly=on \
+  -fsdev local,id=quiz-kernel,path=$_quiz_kernel_dir,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-kernel,mount_tag=quiz-kernel \
   -fsdev local,id=quiz-system,path=$RUNDIR/system/work,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-system,mount_tag=quiz-system \

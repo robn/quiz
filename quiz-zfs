@@ -83,7 +83,7 @@ do_configure() {
   #     zts-tests.sh is hardcoded to /usr for now -- robn, 2025-01-13
   $QUIZ_BUILD_CMD_PREFIX ./configure \
     --config-cache \
-    --with-linux=$RUNDIR/system/kernel/$_quiz_arch_kernel/kbuild/$_quiz_kver \
+    --with-linux=$RUNDIR/system/kernel/quiz-kernel-$_quiz_arch_kernel-$_quiz_kver/kbuild/$_quiz_kver \
     --prefix=/usr/local \
     --disable-sysvinit \
     --disable-systemd \
@@ -108,7 +108,7 @@ do_make_install() {
     ln -sf usr/$d $RUNDIR/system/work/$d
   done
 
-  kdest=$RUNDIR/system/kernel/$_quiz_arch_kernel
+  kdest=$RUNDIR/system/kernel/quiz-kernel-$_quiz_arch_kernel-$_quiz_kver
   $QUIZ_BUILD_CMD_PREFIX make install \
     INSTALL_MOD_PATH=$kdest \
     DESTDIR=$RUNDIR/system/work \
