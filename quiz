@@ -251,7 +251,7 @@ $qemu_bin $qemu_machine_opts $qemu_cpu_opts \
   -device virtconsole,chardev=virtiocon0 \
   -device virtio-balloon-pci \
   -device pvpanic-pci \
-  -drive id=root,file=$RUNDIR/system/$_quiz_debian_release.$_quiz_debian_arch.ext2,format=raw,read-only=on,if=none \
+  -drive id=root,file=$QUIZ_ROOT_DIR/$_quiz_debian_release.$_quiz_debian_arch.ext2,format=raw,read-only=on,if=none \
   -device virtio-blk-pci,drive=root,serial=root \
   -fsdev local,id=quiz-init,path=$RUNDIR/system/init,security_model=none,readonly=on \
   -device virtio-9p-pci,fsdev=quiz-init,mount_tag=quiz-init \

@@ -9,6 +9,10 @@
 # default config for 'quiz', including generated config
 # don't change this, override in quiz.cfg
 
+QUIZ_DIR=$HOME/.quiz
+QUIZ_KERNEL_DIR=$QUIZ_DIR/kernel
+QUIZ_ROOT_DIR=$QUIZ_DIR/root
+
 # local machine architecture (-a will override)
 QUIZ_ARCH=$(uname -m)
 

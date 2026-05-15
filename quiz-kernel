@@ -100,9 +100,9 @@ if [[ -z $opt_kernel && -z $opt_all_kernels ]] ; then
 fi
 
 if [[ -n $opt_all_kernels ]] ; then
-    opt_kernel=$(ls -d $RUNDIR/system/kernel/quiz-kernel-$_quiz_arch_kernel-* | cut -d- -f4- | sort -V)
+    opt_kernel=$(ls -d $QUIZ_KERNEL_DIR/quiz-kernel-$_quiz_arch_kernel-* | cut -d- -f4- | sort -V)
     if [[ -z $opt_kernel ]] ; then
-      fail "no kernels found matching system/kernel/quiz-kernel-$_quiz_arch_kernel-*"
+      fail "no kernels found matching $QUIZ_KERNEL_DIR/quiz-kernel-$_quiz_arch_kernel-*"
     fi
 fi
 
@@ -377,7 +377,7 @@ build_kernel() {
 
     trace "installing completed kernel: $_quiz_kver"
 
-    local kdest=$RUNDIR/system/kernel/quiz-kernel-$_quiz_arch_kernel-$_quiz_kver
+    local kdest=$QUIZ_KERNEL_DIR/quiz-kernel-$_quiz_arch_kernel-$_quiz_kver
     mkdir -p $kdest
 
     # merged /usr setup

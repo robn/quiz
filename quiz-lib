@@ -148,7 +148,7 @@ function quiz_kernel_best_available () {
     fail "no kernel version set. use -k or set QUIZ_KERNEL_VERSION"
   fi
 
-  local kernel_dir=$RUNDIR/system/kernel
+  local kernel_dir=$QUIZ_KERNEL_DIR
   local kernel_slug=quiz-kernel-$_quiz_arch_kernel
 
   _quiz_kernel_dir=""
