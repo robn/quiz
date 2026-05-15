@@ -108,12 +108,11 @@ do_make_install() {
     ln -sf usr/$d $RUNDIR/system/work/$d
   done
 
-  kdest=$QUIZ_KERNEL_DIR/quiz-kernel-$_quiz_arch_kernel-$_quiz_kver
+  kdest=$RUNDIR/system/work
   $QUIZ_BUILD_CMD_PREFIX make install \
     INSTALL_MOD_PATH=$kdest \
     DESTDIR=$RUNDIR/system/work \
     "$@"
-  $QUIZ_BUILD_CMD_PREFIX /sbin/depmod -A -b $kdest $_quiz_kver
 }
 
 case "$1" in

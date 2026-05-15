@@ -4,6 +4,9 @@
 rm -rf /etc/zfs
 mkdir /etc/zfs
 
+# rebuild module dependencies; since the overlay "added" two new modules
+depmod
+
 # load modules
 modprobe zfs
 
