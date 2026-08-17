@@ -258,6 +258,9 @@ build_kernel() {
           --location \
           --fail \
             $kurl
+        if [[ ! -r tmp/$karchive ]] ; then
+          fail "download failed: $karchive"
+        fi
         mv tmp/$karchive $karchive
       fi
       if [[ $ksrctype == 'tar' ]] ; then
