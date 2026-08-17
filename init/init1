@@ -54,6 +54,11 @@ umount --lazy /mnt/mnt/quiz-user
 umount --lazy /mnt/mnt/quiz-init
 umount --lazy /mnt
 
+# mark the entire mount tree shared. this does nothing if you're not actively
+# working with mount propagation, but it matches systemd's default behaviour
+# and shakes out some quirks in filesystem testing, so is useful
+mount --make-rshared /
+
 # bounce into the second stage
 exec /.quiz/init2
 
