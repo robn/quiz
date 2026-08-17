@@ -148,8 +148,14 @@ for kver in $opt_kernel ; do
       if [[ ! -e $sumfile ]] ; then
         touch --date=@0 $sumfile
       fi
-      curl -# -f -o $sumfile -z $sumfile -R \
-        https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/sha256sums.asc
+      if ! curl -# -f -o $sumfile -z $sumfile -R \
+        https://cdn.kernel.org/pub/linux/kernel/v$_quiz_kmajor.x/sha256sums.asc ; then
+        if [[ -s $sumfile ]] ; then
+          trace "fetch failed (curl rc=$?), using existing sumfile: $sumfile"
+        else
+          fail "fetch failed (curl rc=$?)"
+        fi
+      fi
       kernel_sumfile[$_quiz_kmajor]=$sumfile
     fi
     latest=$(cat ${kernel_sumfile[$_quiz_kmajor]} | \
