@@ -71,6 +71,8 @@ fi
 
 image_basefile=$_quiz_debian_release.$_quiz_debian_arch
 
+mkdir -p $QUIZ_ROOT_DIR
+
 mmdebstrap \
   --mode=unshare \
   --format=ext2 \
