@@ -216,8 +216,9 @@ function quiz_arch_vars () {
     aarch64)
       _quiz_arch_kernel=arm64
       ;;
-    ppc64)
+    powerpc64)
       _quiz_arch_kernel=powerpc
+      _quiz_arch_qemu=ppc64
       ;;
     riscv64)
       _quiz_arch_kernel=riscv
@@ -273,7 +274,7 @@ function quiz_debian_vars () {
     riscv64)
       _quiz_debian_arch=riscv64
       ;;
-    ppc64)
+    powerpc64)
       _quiz_debian_arch=ppc64
       _quiz_debian_release=unstable
       _quiz_debian_mirror="[trusted=yes] https://deb.debian.org/debian-ports"
